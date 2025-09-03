@@ -1,0 +1,60 @@
+/*
+  tokens.css — Design tokens consolidated from local references.
+  Sources sampled:
+  - coffee-shop-html-template/css/style.css (:root variables, Montserrat, palette)
+  - spicyo/css/style.css (teal accent, focus rings)
+  - bakery/css/style.css (Poppins/Roboto, warm accent)
+*/
+
+:root {
+  /* Colors — style2 standardization */
+  --color-primary: #cc0000; /* style2 accent used in .drag-column-on-hold */
+  --color-secondary: #111111; /* dark UI accents */
+  --color-accent: #cc0000; /* align accent with primary */
+  --color-bg: #FFFFFF; /* neutral background */
+  --color-surface: #FFFFFF;
+  --color-text: #111111;
+  --color-muted: #6C757D;
+  --color-success: #28A745;
+  --color-warning: #FFC107;
+  --color-danger: #DC3545;
+  --color-border: #E5E7EB;
+
+  /* Typography */
+  --font-sans: "Poppins", "Montserrat", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --font-size-base: 16px;
+  --line-height-base: 1.5;
+
+  /* Radii & Shadows */
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.06);
+  --shadow: 0 2px 8px rgba(0,0,0,.08);
+  --shadow-lg: 0 10px 24px rgba(0,0,0,.14);
+
+  /* Spacing scale */
+  --spacing-1: .25rem;
+  --spacing-2: .5rem;
+  --spacing-3: .75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.5rem;
+  --spacing-6: 2rem;
+
+  /* Layout */
+  --container-max: 1200px;
+  --grid-gap: 1rem;
+
+  /* Derived */
+  --on-primary: #FFFFFF; /* ensure contrast on red primary */
+  --on-secondary: #FFFFFF;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0F0F10;
+    --color-surface: #191A1B;
+    --color-text: #F4F5F7;
+    --color-border: #2A2C2E;
+  }
+}

@@ -1,0 +1,17 @@
+/* utilities.css — optional helpers */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.grid-cols-1 { --cols: 1; }
+.grid-cols-2 { --cols: 2; }
+.grid-cols-3 { --cols: 3; }
+.grid-cols-4 { --cols: 4; }
+.w-full { width: 100%; }
+.max-w-sm { max-width: 380px; }
+.max-w-md { max-width: 640px; }
+.max-w-lg { max-width: 960px; }
+.rounded { border-radius: var(--radius); }
+.rounded-full { border-radius: 999px; }
+.border { border: 1px solid var(--color-border); }
+.bg-surface { background: var(--color-surface); }
+.bg-muted { background: #F2F3F5; }
+.text-muted { color: var(--color-muted); }
+

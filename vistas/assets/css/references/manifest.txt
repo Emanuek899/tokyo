@@ -1,0 +1,8 @@
+Referencias locales utilizadas para tokens/base:
+
+- coffee-shop-html-template/css/style.css (variables :root, colores, tipografía Montserrat)
+- spicyo/css/style.css (acento teal #38C8A8, estilos de focus/btn)
+- bakery/css/style.css (Poppins/Roboto y acento cálido #FAB000)
+
+Se copian extractos no modificados en los archivos adjuntos para registro.
+

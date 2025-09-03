@@ -1,0 +1,13 @@
+/* Extractos relevantes de spicyo/css/style.css */
+
+button:focus { outline: none; }
+.form-control:focus {
+  border-color: #ffffff !important;
+  box-shadow: 0 0 0 .2rem rgba(255, 255, 255, .25);
+}
+
+/* Colores de acento observados */
+/* teal principal */
+/* background: #38c8a8; */
+/* color: #114c7d; */
+
