@@ -183,17 +183,39 @@
     try{ const promos = await API.promos.listar(); $('#lista-promos').innerHTML = promos.map(promoCard).join(''); }catch(e){ console.error(e); }
   }
 
+  //!-------------------------------------------------
+  function mostrarSucursalesEnMapa(sucursales) {
+  map.eachLayer((layer) => {
+    if (layer instanceof L.Marker) map.removeLayer(layer);
+  });
+
+  sucursales.forEach(sucursal => {
+    if (sucursal.latitud && sucursal.longitud) {
+      L.marker([sucursal.latitud, sucursal.longitud])
+        .addTo(map)
+        .bindPopup(sucursal.nombre);
+    }
+  });
+  const group = L.featureGroup(
+    sucursales.map(s => L.marker([s.latitud, s.longitud]))
+  );
+  if (sucursales.length > 0) map.fitBounds(group.getBounds().pad(0.2));
+}
+//!--------------------------------------------------------------------
+
   async function initSucursales(){
     try{
       const sedeId = localStorage.getItem('selectedSedeId') || '';
       const data = await API.sucursales.listar(sedeId? { sede_id: sedeId } : {});
       $('#lista-sucursales').innerHTML = data.map(branchCard).join('');
+      mostrarSucursalesEnMapa(data);
       const name = localStorage.getItem('selectedSedeName') || '';
       $('#mapa').textContent = 'Mapa placeholder '+(name? `(Sede: ${name})` : '(todas las sedes)');
       window.addEventListener('sede:changed', async (ev) => {
         const id = ev.detail?.id || '';
         const list = await API.sucursales.listar(id? { sede_id: id } : {});
         $('#lista-sucursales').innerHTML = list.map(branchCard).join('');
+        mostrarSucursalesEnMapa(list);
         const nm = ev.detail?.name || '';
         $('#mapa').textContent = 'Mapa placeholder '+(nm? `(Sede: ${nm})` : '(todas las sedes)');
       });
