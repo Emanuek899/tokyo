@@ -17,7 +17,7 @@
           <div class="section-header">
             <h2>Sucursales</h2>
           </div>
-          <div id="lista-sucursales" class="grid grid--auto grid--responsive"></div>
+          <div id="lista-sucursales" class="grid grid--responsive grid--responsive"></div>
         </div>
 
         <div class="card">
