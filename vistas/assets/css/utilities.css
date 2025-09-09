@@ -13,5 +13,9 @@
 .border { border: 1px solid var(--color-border); }
 .bg-surface { background: var(--color-surface); }
 .bg-muted { background: #F2F3F5; }
+.bottom { margin-top: auto; }
 .text-muted { color: var(--color-muted); }
+.text { color: var(--color-text); }
+
+
 

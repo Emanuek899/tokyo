@@ -22,36 +22,54 @@
     return t.content.firstElementChild;
   }
 
+/**
+ * Funcion para generar cards de producto
+ * @param {} p 
+ * @returns 
+ */
   function productCard(p){
     const tags = (p.tags||[]).map(t => `<span class="chip"><span class="chip__dot" style="background:${tagColor(t)}"></span>${t}</span>`).join('');
     const stateBadge = stateToBadge(p.estado);
     const imgSrc = resolveImage(p.imagen);
     return `
-    <article class="card card--product" data-name="${(p.nombre||'').toLowerCase()}" data-category="${p.categoria||''}" data-tags="${(p.tags||[]).join(',')}">
+    <article class="card card--product flex column" data-name="${(p.nombre||'').toLowerCase()}" data-category="${p.categoria||''}" data-tags="${(p.tags||[]).join(',')}">
       <a class="media" href="platillo.php?slug=${encodeURIComponent(p.slug||'')}" aria-label="Ver ${p.nombre||''}">
         <img src="${imgSrc}" alt="${p.nombre||''}">
       </a>
       <div class="card__body">
         <div class="flex justify-between items-center">
           <h3 class="title">${p.nombre||''}</h3>
-          <div class="price">$${Number(p.precio||0).toFixed(2)}</div>
+          <div class="price">$${Number(p.precio_final||0).toFixed(2)}MX</div>
         </div>
         <div class="badges">${stateBadge}</div>
         <div class="mt-2">${tags}</div>
+        <div class="description">${p.descripcion || "sin descripcion"}</div>
       </div>
-      <div class="card__footer flex justify-between items-center">
-        <span class="text-muted">${p.categoria||'Producto'}</span>
+      <div class="card__footer flex justify-between items-center bottom">
+        <span class="text-muted">${p.categoria_nombre||'Producto'}</span>
         <button class="btn custom-btn btn--sm" data-toast="Agregado al carrito">Agregar</button>
       </div>
     </article>`;
   }
 
+  /**
+   * Funcion para generar etiquetas de estado de producto
+   * Disponible|Agotado|Fuera_horario
+   * 
+   * @param {} st 
+   * @return
+   */
   function stateToBadge(st){
     if(st === 'agotado') return '<span class="badge badge--danger">Agotado</span>';
     if(st === 'fuera_horario') return '<span class="badge badge--muted">Fuera de horario</span>';
     return '<span class="badge badge--success">Disponible</span>';
   }
 
+/**
+ * Funcion para cambiar color de etiquetas
+ * @param {*} tag 
+ * @returns 
+ */
   function tagColor(tag){
     switch(tag){
       case 'spicy': return '#e65100';
@@ -61,6 +79,12 @@
     }
   }
 
+/**
+ * Funcion para generar cards de productos en promocion
+ * 
+ * @param {*} pr 
+ * @returns 
+ */
   function promoCard(pr){
     return `
     <article class="card card--promo">
@@ -75,6 +99,11 @@
     </article>`;
   }
 
+/**
+ * Funcion para generar
+ * @param {} s 
+ * @returns 
+ */
   function branchCard(s){
     const title = s.nombre || s.colonia || 'Sede';
     const ciudad = s.ciudad ? ` · ${s.ciudad}` : '';
@@ -124,6 +153,7 @@
       return v;
     }
 
+    //Filtro de categorias
     function applyClientFilters(items, { term, catId, ordenar }){
       const t = (term||'').toLowerCase();
       let list = Array.isArray(items) ? items.slice() : [];

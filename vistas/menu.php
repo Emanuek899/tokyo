@@ -10,7 +10,7 @@
     <?php include __DIR__.'/components/filtros-menu.php'; ?>
     <section class="section">
       <div class="container">
-        <div id="grid-productos" class="grid grid--auto grid--responsive" aria-live="polite"></div>
+        <div id="grid-productos" class="grid grid--auto grid--responsive grid-cols-2" aria-live="polite"></div>
       </div>
     </section>
   </main>
