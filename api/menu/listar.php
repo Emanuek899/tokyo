@@ -62,6 +62,7 @@ try {
   }
 
   // Filtro por categoría (columna directa o pivote)
+  $joins[] = 'LEFT JOIN catalogo_categorias c ON c.id = p.categoria_id';
   if ($categoriaId > 0) {
     if (column_exists($pdo, 'productos', 'categoria_id')) {
       $wheres[] = 'p.categoria_id = :cat';
@@ -125,7 +126,7 @@ try {
   $total = (int)$st->fetchColumn();
 
   // Items
-  $sql = "SELECT p.id, p.nombre, p.descripcion, p.imagen, $selectPrecio
+  $sql = "SELECT p.id, p.nombre, p.descripcion, p.imagen, $selectPrecio,  c.id AS categoria_id, c.nombre AS categoria_nombre
           FROM productos p{$joinSql}{$whereSql}
           ORDER BY $orderSql
           LIMIT :limit OFFSET :offset";
