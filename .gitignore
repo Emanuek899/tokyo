@@ -1,6 +1,8 @@
-.swo
-.swp
-.swk
-.swm
-.swl
-.swn
+# Temporal vim files
+*.swo
+*.swp
+*.swk
+*.swm
+*.swl
+*.swn
+*.sw?
