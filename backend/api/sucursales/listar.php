@@ -54,9 +54,11 @@ try {
     foreach ($cand as $p) { if (is_readable($p)) { $jsonPath = $p; break; } }
     if (!$jsonPath) { json_response([]); }
     $data = json_decode(file_get_contents($jsonPath), true) ?: [];
-    if ($city !== '') {
-        $data = array_values(array_filter($data, fn($s) => isset($s['ciudad']) && $s['ciudad'] === $city));
-    }
+   if ($city !== '') {
+    $data = array_values(array_filter($data, function($s) use ($city) {
+        return isset($s['ciudad']) && $s['ciudad'] === $city;
+    }));
+}
     json_response($data);
 } catch (Throwable $e) {
     json_error('Error al listar sucursales', 500, $e->getMessage());

@@ -21,14 +21,13 @@
         </div>
 
         <div class="card">
-          <div class="card__body">
-            <h2 class="mb-2">Mapa</h2>
-            <div id="mapa" class="bg-muted rounded"
-              style="height:420px; display:flex; align-items:center; justify-content:center;">
-              Mapa placeholder
-            </div>
-          </div>
+    <div class="card__body">
+        <h2 class="mb-2">Mapa</h2>
+        <div style="position: relative; height: 420px; width: 100%; display: block;">
+            <div id="mapa" style="height: 100%; width: 100%; position: relative; display: block;"></div>
         </div>
+    </div>
+</div>
       </div>
     </section>
   </main>
@@ -41,15 +40,17 @@
   const contenedor = document.getElementById('mapa');
   if (!contenedor) return;
 
-  const tokyoSushi = [24.041959935594893, -104.65779522073265];//local de tokyoo sushi en Forestal
-  const map = L.map(contenedor).setView(tokyoSushi, 13);
+  const tokyoForestal = [24.041959935594893, -104.65779522073265];
+  const tokyoDomingoA = [23.99704565241786, -104.66227861447034];
+  const map = L.map(contenedor).setView(tokyoForestal, 12);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors',
-    maxZoom: 18
+    maxZoom: 16
   }).addTo(map);
 
-  L.marker(tokyoSushi).addTo(map).bindPopup('Tokyo Sushi - Sucursal');
+  L.marker(tokyoForestal).addTo(map).bindPopup('Sucursal Forestal');
+  L.marker(tokyoDomingoA).addTo(map).bindPopup('Sucursal Domingo Arrieta');
 
   window.addEventListener('load', () => {
     map.invalidateSize();
