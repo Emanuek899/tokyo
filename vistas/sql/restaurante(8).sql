@@ -1912,7 +1912,8 @@ CREATE TABLE `sedes` (
 --
 
 INSERT INTO `sedes` (`id`, `nombre`, `direccion`, `rfc`, `telefono`, `correo`, `web`, `activo`) VALUES
-(1, 'Forestal', 'Blvd. Luis Donaldo Colosio #317, Fracc. La Forestal ', 'VEAJ9408188U9', '618 322 2352', 'ventas@tokyo.com', 'tokyosushi.com', 1);
+(1, 'Forestal', 'Blvd. Luis Donaldo Colosio #317, Fracc. La Forestal ', 'VEAJ9408188U9', '618 322 2352', 'ventas@tokyo.com', 'tokyosushi.com', 1),
+(2, 'Domingo Arrieta', 'Blvd. Domingo Arrieta #109, El Naranjal', 'CCCCCCC', '6181234567', 'ventas@tokyo.com', 'tokyosushi.com', 1);
 
 -- --------------------------------------------------------
 
