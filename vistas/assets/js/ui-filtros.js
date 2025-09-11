@@ -20,6 +20,7 @@
     const t = document.createElement('template');
     t.innerHTML = html.trim();
     return t.content.firstElementChild;
+  
   }
 
 /**
@@ -43,7 +44,7 @@
         </div>
         <div class="badges">${stateBadge}</div>
         <div class="mt-2">${tags}</div>
-        <div class="description">${p.descripcion || "sin descripcion"}</div>
+        <div class="description text-center">${p.descripcion || "sin descripcion"}</div>
       </div>
       <div class="card__footer flex justify-between items-center bottom">
         <span class="text-muted">${p.categoria_nombre||'Producto'}</span>
