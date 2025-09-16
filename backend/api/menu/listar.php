@@ -24,11 +24,12 @@ try {
         $catIds = array_values(array_filter(array_map('intval', explode(',', $categoriaParam)), fn($v) => $v > 0));
         if ($catIds) {
             $in = implode(',', array_fill(0, count($catIds), '?'));
-            $where[] = "p.categoria_id IN ($in)";
+            where[] = "p.categoria_id IN ($in)";
             $params = array_merge($params, $catIds);
         }
     }
 
+    // selector de metodo de ordenamiento 
     $orderBy = 'p.nombre ASC';
     if ($ordenar === 'precio-asc') $orderBy = 'p.precio ASC';
     if ($ordenar === 'precio-desc') $orderBy = 'p.precio DESC';

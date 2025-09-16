@@ -16,6 +16,4 @@
 .bottom { margin-top: auto; }
 .text-muted { color: var(--color-muted); }
 .text { color: var(--color-text); }
-
-
-
+.text-center { text-align: center; }
