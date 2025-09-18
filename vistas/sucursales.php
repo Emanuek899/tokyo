@@ -23,8 +23,8 @@
         <div class="card">
     <div class="card__body">
         <h2 class="mb-2">Mapa</h2>
-        <div style="position: relative; height: 420px; width: 100%; display: block;">
-            <div id="mapa" style="height: 100%; width: 100%; position: relative; display: block;"></div>
+        <div style="position: relative; height: 420px; width: 100%; display: block; z-index: 1;">
+            <div id="mapa" style="height: 100%; width: 100%; position: absolute; top: 0; left: 0; z-index: 1;"></div>
         </div>
     </div>
 </div>
