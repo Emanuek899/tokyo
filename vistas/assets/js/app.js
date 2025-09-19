@@ -82,7 +82,7 @@
       const sedes = await API.sucursales.listar({});
       sel.innerHTML = '';
       const optAll = document.createElement('option'); optAll.value=''; optAll.textContent='Todas las sedes'; sel.appendChild(optAll);
-      sedes.forEach(s => { const o=document.createElement('option'); o.value=String(s.id); o.textContent=s.nombre || ('Sede '+s.id); sel.appendChild(o); });
+      sedes.forEach(s => { const o=document.createElement('option'); o.value=String(s.id); o.textContent=s.nombre || (`Sede ${s.colonia}`); sel.appendChild(o); });
       const savedId = localStorage.getItem('selectedSedeId') || '';
       if(savedId && Array.from(sel.options).some(o=>o.value===savedId)) sel.value = savedId; else sel.value='';
       updateSedeLabel();
