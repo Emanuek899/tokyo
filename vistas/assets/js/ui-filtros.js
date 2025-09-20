@@ -142,14 +142,14 @@
         ? `<p class="text-muted">Servicios: ${s.servicios.join(", ")}</p>`
         : "";
     return `
-    <article class="card">
+    <article class="card" data-sede-id="${s.id}">
       <div class="card__body">
         <h3 class="title">${title}${ciudad}</h3>
         ${direccion}
         ${telefono}
         ${horario}
         ${servicios}
-        <div class="mt-2"><button class="btn custom-btn btn--sm" data-toast="Sede elegida">Elegir esta sede</button></div>
+        <div class="mt-2"><button class="btn custom-btn btn--sm" data-sedelect="Sede elegida">Elegir esta sede</button></div>
       </div>
     </article>`;
   }
