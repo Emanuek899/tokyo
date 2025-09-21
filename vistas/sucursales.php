@@ -33,35 +33,6 @@
   </main>
   <?php include __DIR__ . '/partials/footer.php'; ?>
 
-  <script>
-   document.addEventListener('DOMContentLoaded', function () {
-  if (document.body.dataset.page !== 'sucursales') return;
-
-  const contenedor = document.getElementById('mapa');
-  if (!contenedor) return;
-
-  const tokyoForestal = [24.041959935594893, -104.65779522073265];
-  const tokyoDomingoA = [23.99704565241786, -104.66227861447034];
-  const map = L.map(contenedor).setView(tokyoForestal, 12);
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors',
-    maxZoom: 16
-  }).addTo(map);
-
-  L.marker(tokyoForestal).addTo(map).bindPopup('Sucursal Forestal');
-  L.marker(tokyoDomingoA).addTo(map).bindPopup('Sucursal Domingo Arrieta');
-
-  window.addEventListener('load', () => {
-    map.invalidateSize();
-  });
-
-  window.addEventListener('resize', () => {
-    map.invalidateSize();
-  });
-});
-
-  </script>
 </body>
 
 </html>

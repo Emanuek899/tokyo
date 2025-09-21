@@ -82,7 +82,7 @@
       const sedes = await API.sucursales.listar({});
       sel.innerHTML = '';
       const optAll = document.createElement('option'); optAll.value=''; optAll.textContent='Todas las sedes'; sel.appendChild(optAll);
-      sedes.forEach(s => { const o=document.createElement('option'); o.value=String(s.id); o.textContent=s.nombre || (`${s.colonia}`); sel.appendChild(o); });
+      sedes.forEach(s => { const o=document.createElement('option'); o.value=String(s.id); o.textContent=s.colonia || (`${s.colonia}`); sel.appendChild(o); });
       const savedId = localStorage.getItem('selectedSedeId') || '';
       if(savedId && Array.from(sel.options).some(o=>o.value===savedId)) sel.value = savedId; else sel.value='';
       updateSedeLabel();
@@ -106,13 +106,13 @@
   // Global click handlers for mock actions( se puede usar para la elecion de productos o promos)
   function initMockActions(){
     document.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-toast]');// la mayor parte de las cards tiene en btn "data-toast" xd
+      const btn = e.target.closest('[data-toast]');// la mayor parte de las cards tiene en btn "data-toast" 
       if(btn){ toast(btn.getAttribute('data-toast')); }
     });
   }
 
   function initCardAction (){
-
+    const sel = $('#city-select');
     const lBl = document.querySelector("#sede-current");
     document.addEventListener("click",(e) =>{
       const btn = e.target.closest("[data-sedelect]");
@@ -120,19 +120,35 @@
       const card = btn.closest(".card");
       if (!card) return;
 
-      const sedeId = card.getAttribute("data-sede-id") || "";
+      const sedeId = card.getAttribute("data-sede-id");// en branchCard ui-filtros
       const sedeName = card.querySelector(".title")?.textContent.trim() || "";
       localStorage.setItem("selectedSedeId", sedeId);
       localStorage.setItem("selectedSedeName", sedeName);
       updateSedeLabel();
+      const sedeSelected = document.getElementById('city-select');
+      if(sedeSelected){
+        sedeSelected.value =sedeId;
+      }
+
+      const listaSucursales = document.getElementById('lista-sucursales');
+      if(listaSucursales){
+        listaSucursales.querySelectorAll(".card").forEach(c=>{
+          c.classList.toggle('block',c!==card);//o puede ser 'hidden' para que desaparezca al momento'
+        });
+      }
+      sel.addEventListener('change', () => {
+        const id = sel.value || '';
+        const name = id ? (sel.selectedOptions[0]?.textContent || '') : '';
+        localStorage.setItem('selectedSedeId', id);
+        localStorage.setItem('selectedSedeName', name);
+        updateSedeLabel();
+        window.dispatchEvent(new CustomEvent('sede:changed', { detail: { id, name } }));
+        toast(name ? (`Sede: ${name}`) : 'Todas las sedes');
+      });
+
 
       window.dispatchEvent(new CustomEvent("sede:changed",{detail:{id: sedeId, name: sedeName}}));
       toast(`${btn.getAttribute("data-sedelect")}: ${sedeName}`); 
-      //considerar para cuando arregle el mapa xd
-      // const allCards = document.querySelectorAll(".card");
-      // allCards.forEach(c => {
-      //   if (c !== card) c.style.display = "none";
-      // });
     }
   });
 
@@ -140,8 +156,49 @@
       const n = localStorage.getItem("selectedSedeName") || "";
       if(lBl) lBl.textContent=n? `Sede: ${n}`: "";
     }
-    updateSedeLabel();
   }
+
+
+
+ document.addEventListener('DOMContentLoaded', function(){
+  if(document.body.dataset.page !== 'sucursales') return;
+
+  const contenedor = document.getElementById('mapa');
+  if(!contenedor) return;
+
+  const map = L.map(contenedor).setView([24.04195, -104.65779], 12);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 16
+  }).addTo(map);
+
+  const markers = {
+    "1": L.marker([24.04195, -104.65779]).addTo(map).bindPopup('Sucursal Forestal'),
+    "2": L.marker([23.99704, -104.66227]).addTo(map).bindPopup('Sucursal Domingo Arrieta')
+  };
+
+  function centerMap(id){
+    if(markers[id]){
+      map.setView(markers[id].getLatLng(),14);
+      markers[id].openPopup();
+    } else {
+      const group = L.featureGroup(Object.values(markers));
+      map.fitBounds(group.getBounds().pad(0.2));
+    }
+  }
+
+  window.addEventListener('load', () => map.invalidateSize());
+  window.addEventListener('resize', () => map.invalidateSize());
+
+  window.addEventListener("sede:changed", (e) => {
+    centerMap(e.detail.id);
+  });
+  const savedSedeId = localStorage.getItem('selectedSedeId');
+  if(savedSedeId) centerMap(savedSedeId);
+});
+
+
 
 
 
