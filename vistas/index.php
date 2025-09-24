@@ -19,8 +19,9 @@
 <body data-page="home">
   <?php include __DIR__.'/partials/header.php'; ?>
   <main>
-    <section class="hero">
-      <div class="container">
+    <section class="hero position-relative">
+        <?php include __DIR__.'/components/slider.php'; ?>
+      <div class="container position-absolute top-50 start-50 translate-middle text-center hero-content">
         <h1 class="hero__title">Sushi fresco, rápido y delicioso</h1>
         <p class="muted max-w-md">Pide ahora o explora nuestro menú por categorías. Promos visibles y sucursales cerca de ti.</p>
         <div class="hero__actions mt-3">
