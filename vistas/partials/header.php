@@ -5,7 +5,7 @@
       <span>Tokyo Sushi</span>
     </a>
     <nav class="header__spacer"></nav>
-    <nav class="navbar-nav" aria-label="Principal">
+    <nav class="navbar-nav flex-row" aria-label="Principal">
       <a class="nav-link" href="index.php" <?= (basename($_SERVER['PHP_SELF'])==='index.php'?'aria-current="page"':'') ?>>Home</a>
       <a class="nav-link" href="menu.php" <?= (basename($_SERVER['PHP_SELF'])==='menu.php'?'aria-current="page"':'') ?>>Menú</a>
       <a class="nav-link" href="promociones.php" <?= (basename($_SERVER['PHP_SELF'])==='promociones.php'?'aria-current="page"':'') ?>>Promos</a>
