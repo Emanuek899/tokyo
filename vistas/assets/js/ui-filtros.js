@@ -192,6 +192,7 @@
     window.addEventListener("sede:changed", async () => {
       await loadSucursales();
       await loadTop();
+      await loadPromos();
     });
   }
 
@@ -206,7 +207,9 @@
     const ordenar = $("#ordenar");
     const render = (items) => {
       grid.innerHTML = (items || []).map(productCard).join("");
+    
     };
+    
 
     function normalizeOrden(by, term) {
       let v = (by || "").trim();
@@ -357,9 +360,44 @@
     }
   }
 
-  async function initPlatillo() {
-    /* sin lógica adicional */
+async function initPlatillo() {
+  const container = document.querySelector('main');
+  const params = new URLSearchParams(window.location.search);
+  const slug = decodeURIComponent(params.get('slug') || '');
+  console.log('Nombre Slug(platillo):', slug);
+
+  try {
+    const { items } = await API.menu.listar();
+    console.log('Productos obtenidos:', items);
+
+    const normalizeSlug = (str) =>str.replace(/[^\w-]+/g, ''); 
+    const platillo = items.find(p => normalizeSlug(p.nombre) === normalizeSlug(slug));
+    console.log('Platillo encontrado:', platillo);
+    if (!platillo) {
+      container.innerHTML = '<p> <h2>Platillo no encontrado. </h2></p>';
+      return;
+    }
+    document.querySelector('.section-header h2').textContent = platillo.nombre;
+    document.querySelector('.muted ').textContent = platillo.descripcion || 'Sin descripción';
+    document.querySelector('.price').textContent = `$${Number(platillo.precio_final).toFixed(2)} MX`;
+    const imgs = document.querySelectorAll('.grid--auto img');
+    if (imgs.length) {
+      imgs.forEach((img, idx) => {
+        img.src = idx === 0 && platillo.imagen ? `assets/img/${platillo.imagen}` : 'assets/img/placeholder.svg';
+        img.alt = platillo.nombre;
+      });
+    }
+
+  } catch (error) {
+    console.error('Error al cargar el platillo:', error);
+    container.innerHTML = '<p>Platillo no encontrado.</p>';
   }
+}
+
+
+
+  
+
 
   async function initCarrito() {
     const table = document.getElementById("tabla-carrito");

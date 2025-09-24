@@ -28,11 +28,11 @@
               <img src="assets/img/placeholder.svg" alt="Foto 3 platillo">
             </div>
           </div>
-          <div>
+          <div >
             <div class="section-header"><h2>Detalle de platillo</h2></div>
             <p class="muted">Descripción breve del platillo seleccionado (slug: <?= htmlspecialchars($slug) ?>).</p>
-            <div class="mt-3 flex items-center gap-3">
-              <strong style="font-size:1.25rem;">$129.00</strong>
+            <div class=" mt-3 flex items-center gap-3">
+              <strong class="price" style="font-size:1.25rem;"> $129.00</strong>
               <?php include __DIR__.'/components/chips-etiquetas.php'; ?>
             </div>
             <div class="mt-3">
