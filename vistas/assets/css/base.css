@@ -3,6 +3,11 @@
   Uses tokens from assets/css/tokens.css
 */
 
+/* Utilities */
+.hidden {
+  display: none !important;
+}
+
 /* Reset & base */
 *, *::before, *::after { box-sizing: border-box; }
 html { font-size: var(--font-size-base); }
