@@ -23,30 +23,21 @@ class DB {
             ]
         ];
         try{
-            if($sede == 'A'){
-                $dbs = $sedes['A'];
-                $dsn = "mysql:host={$dbs['host']};port={$dbs['port']};dbname={$dbs['db']};charset=utf8mb4";
-                $opts = [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_EMULATE_PREPARES => false,
-                ];
-                self::$pdo = new PDO($dsn, $dbs['user'], $dbs['pass'], $opts);
-                return self::$pdo;
-            }else {
-                $dbs = $sedes['B'];
-                $dsn = "mysql:host={$dbs['host']};port={$dbs['port']};dbname={$dbs['db']};charset=utf8mb4";
-                $opts = [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_EMULATE_PREPARES => false,
-                ];
-                self::$pdo = new PDO($dsn, $dbs['user'], $dbs['pass'], $opts);
-                return self::$pdo;
-            }
+            return self::conn($sedes[$sede]);
         }catch(PDOException $e){
             error_log("Error de conexion a la base de datos" . $e ->getMessage());
         }
+    }
+    
+    private static function conn(array $dbs) : PDO{
+        $dsn = "mysql:host={$dbs['host']};port={$dbs['port']};dbname={$dbs['db']};charset=utf8mb4";
+        $opts = [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+        ];
+        self::$pdo = new PDO($dsn, $dbs['user'], $dbs['pass'], $opts);
+        return self::$pdo;
     }
 }
 
