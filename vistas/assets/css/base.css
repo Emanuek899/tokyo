@@ -120,7 +120,7 @@ th, td { padding: .6rem .5rem; border-bottom: 1px solid var(--color-border); tex
 
 /* Toast */
 .toast-container { position: fixed; bottom: 1rem; right: 1rem; display: grid; gap: .5rem; z-index: 9999; }
-.toast { background: var(--color-secondary); color: var(--on-secondary); padding: .6rem .8rem; border-radius: var(--radius); box-shadow: var(--shadow); opacity: .98; }
+.toast { background: var(--color-secondary); color: var(--on-secondary); padding: .6rem .8rem; border-radius: var(--radius); box-shadow: var(--shadow); opacity: .98 !important; }
 
 /* Hero */
 .hero { background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 20%, #fff), #fff); }
