@@ -5,7 +5,14 @@
   const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
 
   // API helper with AbortController and param normalization
-  const API_BASE = '/tokyo/api';
+  function detectBasePrefix(){
+    const parts = window.location.pathname.split('/').filter(Boolean);
+    if (!parts.length) return '';
+    const idx = parts.indexOf('tokyo');
+    if (idx >= 0) return '/' + parts.slice(0, idx + 1).join('/');
+    return '/' + parts[0];
+  }
+  const API_BASE = detectBasePrefix() + '/api';
   window.apiGet = async function(path, params = {}){
     const p = { ...params };
     const sede = localStorage.getItem('selectedSedeId');
@@ -65,12 +72,12 @@
     t.className = 'toast';
     t.textContent = msg;
     c.appendChild(t);
-    setTimeout(()=>{
-      t.style.transition = 'opacity .3s ease, transform .3s ease';
-      t.style.opacity = '0';
-      t.style.transform = 'translateY(6px)';
-      setTimeout(()=>t.remove(), 350);
-    }, opts.duration || 2200);
+    // setTimeout(()=>{
+    //   t.style.transition = 'opacity .3s ease, transform .3s ease';
+    //   t.style.opacity = '0';
+    //   t.style.transform = 'translateY(6px)';
+    //   setTimeout(()=>t.remove(), 350);
+    // }, opts.duration || 2200);
   }
 
   // City selection persistence
@@ -79,10 +86,11 @@
     const lbl = $('#sede-current');
     if(!sel) return;
     try {
-      const sedes = await API.sucursales.listar({});
+      // Pedir SIEMPRE todas las sedes (sin inyectar sede_id)
+      const sedes = await API.sucursales.listar({ __noSede: true });
       sel.innerHTML = '';
       const optAll = document.createElement('option'); optAll.value=''; optAll.textContent='Todas las sedes'; sel.appendChild(optAll);
-      sedes.forEach(s => { const o=document.createElement('option'); o.value=String(s.id); o.textContent=s.colonia || (`${s.colonia}`); sel.appendChild(o); });
+      sedes.forEach(s => { const o=document.createElement('option'); o.value=String(s.id); o.textContent=s.nombre || ('Sede '+s.id); sel.appendChild(o); });
       const savedId = localStorage.getItem('selectedSedeId') || '';
       if(savedId && Array.from(sel.options).some(o=>o.value===savedId)) sel.value = savedId; else sel.value='';
       updateSedeLabel();
@@ -93,7 +101,7 @@
         localStorage.setItem('selectedSedeName', name);
         updateSedeLabel();
         window.dispatchEvent(new CustomEvent('sede:changed', { detail: { id, name } }));
-        toast(name ? (`Sede: ${name}`) : 'Todas las sedes');
+        toast(name ? ('Sede: '+name) : 'Todas las sedes');
       });
     } catch(e) { console.error(e); }
 
@@ -103,107 +111,13 @@
     }
   }
 
-  // Global click handlers for mock actions( se puede usar para la elecion de productos o promos)
+  // Global click handlers for mock actions
   function initMockActions(){
     document.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-toast]');// la mayor parte de las cards tiene en btn "data-toast" 
+      const btn = e.target.closest('[data-toast]');
       if(btn){ toast(btn.getAttribute('data-toast')); }
     });
   }
-
-  function initCardAction (){
-    const sel = $('#city-select');
-    const lBl = document.querySelector("#sede-current");
-    document.addEventListener("click",(e) =>{
-      const btn = e.target.closest("[data-sedelect]");
-      if(btn){
-      const card = btn.closest(".card");
-      if (!card) return;
-
-      const sedeId = card.getAttribute("data-sede-id");// en branchCard ui-filtros
-      const sedeName = card.querySelector(".title")?.textContent.trim() || "";
-      localStorage.setItem("selectedSedeId", sedeId);
-      localStorage.setItem("selectedSedeName", sedeName);
-      updateSedeLabel();
-      const sedeSelected = document.getElementById('city-select');
-      if(sedeSelected){
-        sedeSelected.value =sedeId;
-      }
-
-      const listaSucursales = document.getElementById('lista-sucursales');
-      if(listaSucursales){
-        listaSucursales.querySelectorAll(".card").forEach(c=>{
-          c.classList.toggle('block',c!==card);//o puede ser 'hidden' para que desaparezca al momento'
-        });
-      }
-      sel.addEventListener('change', () => {
-        const id = sel.value || '';
-        const name = id ? (sel.selectedOptions[0]?.textContent || '') : '';
-        localStorage.setItem('selectedSedeId', id);
-        localStorage.setItem('selectedSedeName', name);
-        updateSedeLabel();
-        window.dispatchEvent(new CustomEvent('sede:changed', { detail: { id, name } }));
-        toast(name ? (`Sede: ${name}`) : 'Todas las sedes');
-      });
-
-
-      window.dispatchEvent(new CustomEvent("sede:changed",{detail:{id: sedeId, name: sedeName}}));
-      toast(`${btn.getAttribute("data-sedelect")}: ${sedeName}`); 
-    }
-  });
-
-    function updateSedeLabel(){
-      const n = localStorage.getItem("selectedSedeName") || "";
-      if(lBl) lBl.textContent=n? `Sede: ${n}`: "";
-    }
-  }
-
-
-
- document.addEventListener('DOMContentLoaded', function(){
-  if(document.body.dataset.page !== 'sucursales') return;
-
-  const contenedor = document.getElementById('mapa');
-  if(!contenedor) return;
-
-  const map = L.map(contenedor).setView([24.04195, -104.65779], 12);
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors',
-    maxZoom: 16
-  }).addTo(map);
-
-  const markers = {
-    "1": L.marker([24.04195, -104.65779]).addTo(map).bindPopup('Sucursal Forestal'),
-    "2": L.marker([23.99704, -104.66227]).addTo(map).bindPopup('Sucursal Domingo Arrieta')
-  };
-
-  function centerMap(id){
-    if(markers[id]){
-      map.setView(markers[id].getLatLng(),14);
-      markers[id].openPopup();
-    } else {
-      const group = L.featureGroup(Object.values(markers));
-      map.fitBounds(group.getBounds().pad(0.2));
-    }
-  }
-
-  window.addEventListener('load', () => map.invalidateSize());
-  window.addEventListener('resize', () => map.invalidateSize());
-
-  window.addEventListener("sede:changed", (e) => {
-    centerMap(e.detail.id);
-  });
-  const savedSedeId = localStorage.getItem('selectedSedeId');
-  if(savedSedeId) centerMap(savedSedeId);
-});
-
-
-
-
-
-
-
 
   document.addEventListener('DOMContentLoaded', () => {
     if (window.__TOKYO_BOOTED) return;
@@ -211,9 +125,7 @@
     // Adapt site UI to style1 behaviors
     initStyle1UI();
     initSedeSelector();
-    initCardAction();
     initMockActions();
-    
 
     // Page-specific initialization (see ui-filtros.js)
     const page = document.body.getAttribute('data-page');
@@ -237,7 +149,7 @@
   function withDefaults(params={}){
     const p = { ...params };
     const sedeId = localStorage.getItem('selectedSedeId');
-    if (sedeId) p.sede_id = sedeId;
+    if (sedeId && !p.__noSede) p.sede_id = sedeId;
     return p;
   }
   async function get(path, params={}){
@@ -251,18 +163,37 @@
     const url = `${BASE}${path}`;
     const payload = { ...body, ...withDefaults({}) };
     const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload), credentials: 'same-origin' });
-    if(!res.ok) throw new Error(`POST ${url} ${res.status}`);
+    if(!res.ok){
+      let details = '';
+      try {
+        const txt = await res.text();
+        try { const j = JSON.parse(txt); details = j.details || j.error || txt; }
+        catch { details = txt; }
+      } catch {}
+      throw new Error(`POST ${url} ${res.status}: ${details}`);
+    }
     return res.json();
   }
   window.API = {
     menu: {
       listar: (params) => get('/menu/listar.php', params),
+      obtener: (params) => get('/menu/obtener.php', params),
       categorias: () => get('/menu/categorias.php'),
       top: () => get('/menu/top_vendidos.php')
     },
     promos: { listar: () => get('/promos/listar.php') },
     sucursales: { listar: (params) => get('/sucursales/listar.php', params) },
-    carrito: { calcular: (payload) => post('/carrito/calcular.php', payload) },
+    carrito: {
+      calcular: (payload) => post('/carrito/calcular.php', payload),
+      listar: () => get('/carrito/listar.php'),
+      agregar: (payload) => post('/carrito/agregar.php', payload),
+      actualizar: (payload) => post('/carrito/actualizar.php', payload),
+      eliminar: (payload) => post('/carrito/eliminar.php', payload),
+      vaciar: () => post('/carrito/vaciar.php', {})
+    },
+    checkout: {
+      confirmar: (payload) => post('/checkout/confirmar.php', payload)
+    },
     facturacion: {
       registrarCliente: (payload) => post('/facturacion/registrar_cliente.php', payload),
       generar: (payload) => post('/facturacion/generar.php', payload),
@@ -270,4 +201,3 @@
     }
   };
 })();
-

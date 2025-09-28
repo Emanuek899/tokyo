@@ -64,7 +64,7 @@
       </div>
       <div class="card__footer flex justify-between items-center bottom">
         <span class="text-muted">${p.categoria_nombre || "Producto"}</span>
-        <button class="btn custom-btn btn--sm" data-toast="Agregado al carrito">Agregar</button>
+        <button class="btn custom-btn btn--sm btn-add-cart" data-id="${p.id}">Agregar</button>
       </div>
     </article>`;
   }
@@ -399,57 +399,93 @@ async function initPlatillo() {
   
 
 
-  async function initCarrito() {
-    const table = document.getElementById("tabla-carrito");
-    if (!table) return;
-    const resumen = document.getElementById("resumen");
-    const $sumSubtotal = resumen
-      ? resumen.querySelector("div:nth-of-type(1) strong, #sum-subtotal")
-      : null;
-    const $sumEnvio = resumen
-      ? resumen.querySelector("div:nth-of-type(2) strong, #sum-envio")
-      : null;
-    const $sumTotal = resumen
-      ? resumen.querySelector("div:nth-of-type(3) strong, #sum-total")
-      : null;
-    async function recalc() {
-      const items = Array.from(table.querySelectorAll("tbody tr")).map(
-        (tr) => ({
-          id: parseInt(tr.getAttribute("data-item-id"), 10) || 0,
-          cantidad: parseInt(tr.querySelector(".qty")?.value || "0", 10) || 0,
-        })
-      );
+    async function initCarrito(){
+    const table = document.getElementById('tabla-carrito');
+    if(!table) return;
+    const resumen = document.getElementById('resumen');
+    const $sumSubtotal = resumen ? (resumen.querySelector('#sum-subtotal') || resumen.querySelector('div:nth-of-type(1) strong')) : null;
+    const $sumFee = resumen ? resumen.querySelector('#sum-fee') : null;
+    const $sumEnvio = resumen ? (resumen.querySelector('#sum-envio') || resumen.querySelector('div:nth-of-type(3) strong')) : null;
+    const $sumTotal = resumen ? (resumen.querySelector('#sum-total') || resumen.querySelector('div:nth-of-type(4) strong')) : null;
+    function selectCashTier(subtotal){ const tiers=(window.FeesCfg?.cash?.tiers)||[]; for(const t of tiers){ if(t.threshold==null || subtotal < Number(t.threshold)) return t; } return tiers.length?tiers[tiers.length-1]:null; }
+    function grossUp(p,r,f,iva,min){ const denom=1-(1+iva)*r; if(Math.abs(denom)<1e-9) return {total:p,surcharge:0}; let A=(p+(1+iva)*f)/denom; const C1=((A*r)+f)*(1+iva); const Cmin=(min!=null)?(min*(1+iva)):null; if(Cmin!=null && C1<Cmin){ A=p+Cmin; } return { total:A, surcharge:A-p } }
+    function computeSurcharge(subtotal, method){ if(!window.PassThroughFees) return { total:subtotal, surcharge:0 }; if(method==='card'){ const f=window.FeesCfg?.card||{rate:0,fixed:0,iva:0,min_fee:null}; return grossUp(subtotal, Number(f.rate||0), Number(f.fixed||0), Number(f.iva||0), f.min_fee!=null?Number(f.min_fee):null); } if(method==='bank_transfer' || method==='spei'){ const f=window.FeesCfg?.spei||{fixed:0,iva:0}; const s=(1+Number(f.iva||0))*Number(f.fixed||0); return { total:subtotal+s, surcharge:s }; } if(method==='cash'){ const cfg=window.FeesCfg?.cash||{iva:0,tiers:[]}; const t=selectCashTier(subtotal)||{rate:0,fixed:0,min_fee:null}; return grossUp(subtotal, Number(t.rate||0), Number(t.fixed||0), Number(cfg.iva||0), t.min_fee!=null?Number(t.min_fee):null); } return { total:subtotal, surcharge:0 }; }
+    
+    // Intentar poblar desde sesión del backend si existe API de carrito
+    async function loadFromSession(){
+      try {
+        if (!window.API || !API.carrito || !API.carrito.listar) return;
+        const resp = await API.carrito.listar();
+        const tbody = table.querySelector('tbody');
+        if (!tbody) return;
+        if ((resp.items||[]).length) {
+          tbody.innerHTML = resp.items.map(it => `
+            <tr data-item-id="${it.id}">
+              <td>${it.nombre}</td>
+              <td>
+                <input class="input qty" type="number" min="0" value="${it.cantidad}">
+                <button class="btn btn--sm btn-link btn-del" title="Eliminar">Eliminar</button>
+              </td>
+              <td class="precio">$${Number(it.precio||0).toFixed(2)}</td>
+              <td class="subtotal">$${Number(it.subtotal||0).toFixed(2)}</td>
+            </tr>`).join('');
+          const subtotal = Number(resp.subtotal||0);
+          const envio = Number(resp.envio||0);
+          const calc = computeSurcharge(subtotal, 'card');
+          if($sumSubtotal) $sumSubtotal.textContent = `$${subtotal.toFixed(2)}`;
+          if($sumFee) $sumFee.textContent = `$${Number(calc.surcharge||0).toFixed(2)}`;
+          if($sumEnvio) $sumEnvio.textContent = `$${envio.toFixed(2)}`;
+          if($sumTotal) $sumTotal.textContent = `$${Number((calc.total||subtotal)+envio).toFixed(2)}`;
+        }
+      } catch(e){ console.warn('No se pudo cargar carrito de sesión', e); }
+    }
+    
+    async function recalc(){
+      const items = Array.from(table.querySelectorAll('tbody tr')).map(tr => ({ id: parseInt(tr.getAttribute('data-item-id'),10)||0, cantidad: parseInt(tr.querySelector('.qty')?.value||'0',10)||0 }));
       try {
         const resp = await API.carrito.calcular({ items });
-        resp.items.forEach((it) => {
+        resp.items.forEach(it => {
           const tr = table.querySelector(`tbody tr[data-item-id="${it.id}"]`);
-          if (!tr) return;
-          const precio = tr.querySelector("td.precio");
-          const subtotal = tr.querySelector("td.subtotal");
-          if (precio)
-            precio.textContent = `$${Number(it.precio || 0).toFixed(2)}`;
-          if (subtotal)
-            subtotal.textContent = `$${Number(it.subtotal || 0).toFixed(2)}`;
+          if(!tr) return;
+          const precio = tr.querySelector('td.precio');
+          const subtotal = tr.querySelector('td.subtotal');
+          if(precio) precio.textContent = `$${Number(it.precio||0).toFixed(2)}`;
+          if(subtotal) subtotal.textContent = `$${Number(it.subtotal||0).toFixed(2)}`;
         });
-        if ($sumSubtotal)
-          $sumSubtotal.textContent = `$${Number(resp.subtotal || 0).toFixed(
-            2
-          )}`;
-        if ($sumEnvio)
-          $sumEnvio.textContent = `$${Number(resp.envio || 0).toFixed(2)}`;
-        if ($sumTotal)
-          $sumTotal.textContent = `$${Number(resp.total || 0).toFixed(2)}`;
-      } catch (e) {
-        console.error(e);
-      }
+        const subtotal = Number(resp.subtotal||0);
+        const envio = Number(resp.envio||0);
+        const calc = computeSurcharge(subtotal, 'card');
+        if($sumSubtotal) $sumSubtotal.textContent = `$${subtotal.toFixed(2)}`;
+        if($sumFee) $sumFee.textContent = `$${Number(calc.surcharge||0).toFixed(2)}`;
+        if($sumEnvio) $sumEnvio.textContent = `$${envio.toFixed(2)}`;
+        if($sumTotal) $sumTotal.textContent = `$${Number((calc.total||subtotal)+envio).toFixed(2)}`;
+      } catch(e){ console.error(e); }
     }
-    recalc();
-    table.addEventListener("input", (e) => {
-      if (e.target.matches(".qty")) recalc();
+    
+    // Inicializar con backend si está disponible
+    if (window.API && API.carrito && API.carrito.listar) { loadFromSession(); } else { recalc(); }
+    table.addEventListener('input', async (e)=>{
+      if(!e.target.matches('.qty')) return;
+      const tr = e.target.closest('tr');
+      const id = parseInt(tr.getAttribute('data-item-id'),10)||0;
+      const cantidad = Math.max(0, parseInt(e.target.value||'0',10)||0);
+      if (window.API && API.carrito && API.carrito.actualizar) {
+        try { await API.carrito.actualizar({ producto_id: id, cantidad }); await loadFromSession(); } catch(err){ console.error(err); }
+      } else {
+        recalc();
+      }
     });
-    document
-      .getElementById("btn-recalcular")
-      ?.addEventListener("click", recalc);
+    table.addEventListener('click', async (e)=>{
+      if (!e.target.classList.contains('btn-del')) return;
+      const tr = e.target.closest('tr');
+      const id = parseInt(tr.getAttribute('data-item-id'),10)||0;
+      if (window.API && API.carrito && API.carrito.eliminar) {
+        try { await API.carrito.eliminar({ producto_id: id }); await loadFromSession(); } catch(err){ console.error(err); }
+      } else {
+        tr.remove(); recalc();
+      }
+    });
+    document.getElementById('btn-recalcular')?.addEventListener('click', recalc);
   }
   async function initCheckout() {
     /* estático */
@@ -548,3 +584,87 @@ async function initPlatillo() {
     },
   };
 })();
+
+// Integración de carrito (agregar desde menú) y checkout mínimo
+(function(){
+  // Agregar al carrito desde cards del menú
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.btn-add-cart');
+    if (!btn) return;
+    const id = parseInt(btn.getAttribute('data-id'), 10) || 0;
+    if (!id) return;
+    try {
+      let abierto = true;
+      try {
+        const res = await fetch('../api/corte_caja/verificar_corte_abierto.php', { credentials:'same-origin' });
+        if (res.ok) { const j = await res.json(); abierto = !!(j && j.resultado && j.resultado.abierto); }
+      } catch(e2){}
+      if (!abierto) { toast('El establecimiento seleccionado se encuentra fuera del horario de operaciones'); return; }
+      await API.carrito.agregar({ producto_id: id, cantidad: 1 });
+      toast('Agregado al carrito');
+    } catch(err){
+      console.error(err);
+      const msg = String((err && err.message) || '');
+      if (msg.indexOf(' 409') !== -1) toast('El establecimiento seleccionado se encuentra fuera del horario de operaciones');
+      else toast('No se pudo agregar');
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const page = document.body.getAttribute('data-page');
+    // Checkout: selector de tipo de venta y confirmación (legacy)
+    if (page === 'checkout') {
+      if (document.getElementById('btn-pagar') || document.getElementById('sum-fee')) {
+        return; // Nuevo flujo Conekta ya maneja el resumen y el cargo por plataforma
+      }
+      const resumen = document.querySelector('aside .card .card__body');
+      const btnConfirm = document.querySelector('form.card .btn.custom-btn');
+      if (resumen && btnConfirm) {
+        try {
+          const res = await fetch('../api/corte_caja/verificar_corte_abierto.php', { credentials:'same-origin' });
+          if (res.ok) {
+            const j = await res.json();
+            if (!(j && j.resultado && j.resultado.abierto)) {
+              btnConfirm.setAttribute('disabled','disabled');
+              btnConfirm.addEventListener('click', (ev)=>{ ev.preventDefault(); toast('El establecimiento seleccionado se encuentra fuera del horario de operaciones'); });
+            }
+          }
+        } catch(e){}
+        const form = document.querySelector('form.card');
+        const fs = document.createElement('fieldset');
+        fs.className = 'mt-3';
+        fs.innerHTML = `
+          <legend><strong>Tipo de venta</strong></legend>
+          <label class="flex items-center gap-2 mt-2"><input type="radio" name="tipo_venta" value="rapido" checked> Rápido</label>
+          <label class="flex items-center gap-2 mt-2"><input type="radio" name="tipo_venta" value="mesa"> Mesa</label>
+          <div class="field mt-2" id="campo-mesa" style="display:none"><label>No. mesa</label><input id="inp-mesa" class="input" type="number" min="1"></div>
+          <label class="flex items-center gap-2 mt-2"><input type="radio" name="tipo_venta" value="domicilio"> Repartidor</label>
+          <div class="field mt-2" id="campo-rep" style="display:none"><label>Repartidor (ID)</label><input id="inp-rep" class="input" type="number" min="1"></div>`;
+        form.querySelector('.card__body')?.insertBefore(fs, form.querySelector('fieldset'));
+        form.addEventListener('change', (ev)=>{
+          if (ev.target.name !== 'tipo_venta') return;
+          const v = ev.target.value;
+          document.getElementById('campo-mesa').style.display = v==='mesa' ? '' : 'none';
+          document.getElementById('campo-rep').style.display = v==='domicilio' ? '' : 'none';
+        });
+        try { const resp = await API.carrito.listar(); if (resumen){ resumen.innerHTML = `<h2>Resumen</h2>
+          <div class="flex justify-between mt-2"><span>Subtotal</span><strong id="sum-subtotal">$${Number(resp.subtotal||0).toFixed(2)}</strong></div>
+          <div class="flex justify-between mt-2"><span>Envío</span><strong id="sum-envio">$${Number(resp.envio||0).toFixed(2)}</strong></div>
+          <div class="flex justify-between mt-2"><span>Total</span><strong id="sum-total">$${Number(resp.total||0).toFixed(2)}</strong></div>`; } } catch(e){ console.error(e); }
+        btnConfirm.removeAttribute('disabled'); btnConfirm.title='';
+        btnConfirm.addEventListener('click', async ()=>{
+          try {
+            const tipo = (document.querySelector('input[name="tipo_venta"]:checked')?.value)||'rapido';
+            const mesa_id = tipo==='mesa' ? (parseInt(document.getElementById('inp-mesa').value,10)||null) : null;
+            const repartidor_id = tipo==='domicilio' ? (parseInt(document.getElementById('inp-rep').value,10)||null) : null;
+            await API.checkout.confirmar({ tipo, mesa_id, repartidor_id });
+            toast('Pedido confirmado');
+            window.location.href = 'carrito.php';
+          } catch(err){ console.error(err); toast('No se pudo confirmar el pedido'); }
+        });
+      }
+    }
+  });
+})();
+
+
