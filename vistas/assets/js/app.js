@@ -72,12 +72,12 @@
     t.className = 'toast';
     t.textContent = msg;
     c.appendChild(t);
-    // setTimeout(()=>{
-    //   t.style.transition = 'opacity .3s ease, transform .3s ease';
-    //   t.style.opacity = '0';
-    //   t.style.transform = 'translateY(6px)';
-    //   setTimeout(()=>t.remove(), 350);
-    // }, opts.duration || 2200);
+    setTimeout(()=>{
+      t.style.transition = 'opacity .3s ease, transform .3s ease';
+      t.style.opacity = '0';
+      t.style.transform = 'translateY(6px)';
+      setTimeout(()=>t.remove(), 350);
+    }, opts.duration || 2200);
   }
 
   // City selection persistence
