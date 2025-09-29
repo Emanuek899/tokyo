@@ -90,7 +90,7 @@
       const sedes = await API.sucursales.listar({ __noSede: true });
       sel.innerHTML = '';
       const optAll = document.createElement('option'); optAll.value=''; optAll.textContent='Todas las sedes'; sel.appendChild(optAll);
-      sedes.forEach(s => { const o=document.createElement('option'); o.value=String(s.id); o.textContent=s.nombre || ('Sede '+s.id); sel.appendChild(o); });
+      sedes.forEach(s => { const o=document.createElement('option'); o.value=String(s.id); o.textContent=s.nombre || ('Sede '+s.colonia); sel.appendChild(o); });
       const savedId = localStorage.getItem('selectedSedeId') || '';
       if(savedId && Array.from(sel.options).some(o=>o.value===savedId)) sel.value = savedId; else sel.value='';
       updateSedeLabel();
@@ -101,23 +101,72 @@
         localStorage.setItem('selectedSedeName', name);
         updateSedeLabel();
         window.dispatchEvent(new CustomEvent('sede:changed', { detail: { id, name } }));
-        toast(name ? ('Sede: '+name) : 'Todas las sedes');
+        toast(name ? (name) : 'Todas las sedes');
       });
     } catch(e) { console.error(e); }
 
     function updateSedeLabel(){
       const name = localStorage.getItem('selectedSedeName') || '';
-      if(lbl) lbl.textContent = name ? ('Sede: '+name) : '';
+      if(lbl) lbl.textContent = name ? (`${name}`) : '';
     }
   }
 
   // Global click handlers for mock actions
+  //unicamente es un mock, no funciona 
   function initMockActions(){
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-toast]');
       if(btn){ toast(btn.getAttribute('data-toast')); }
     });
   }
+
+   function initCardAction (){// selector de sucursales en branchCard y filtro
+    const sel = $('#city-select');
+    const lBl = document.querySelector("#sede-current");
+    document.addEventListener("click",(e) =>{
+      const btn = e.target.closest("[data-sedelect]");
+      if(btn){
+      const card = btn.closest(".card");
+      if (!card) return;
+
+      const sedeId = card.getAttribute("data-sede-id");// en branchCard ui-filtros
+      const sedeName = card.querySelector(".title")?.textContent.trim() || "";
+      localStorage.setItem("selectedSedeId", sedeId);
+      localStorage.setItem("selectedSedeName", sedeName);
+      updateSedeLabel();
+      const sedeSelected = document.getElementById('city-select');
+      if(sedeSelected){
+        sedeSelected.value =sedeId;
+      }
+
+      const listaSucursales = document.getElementById('lista-sucursales');
+      if(listaSucursales){
+        listaSucursales.querySelectorAll(".card").forEach(c=>{
+          c.classList.toggle('block',c!==card);//o puede ser 'hidden' para que desaparezca al momento'
+        });
+      }
+      sel.addEventListener('change', () => {
+        const id = sel.value || '';
+        const name = id ? (sel.selectedOptions[0]?.textContent || '') : '';
+        localStorage.setItem('selectedSedeId', id);
+        localStorage.setItem('selectedSedeName', name);
+        updateSedeLabel();
+        window.dispatchEvent(new CustomEvent('sede:changed', { detail: { id, name } }));
+        toast(name ? (`Sede: ${name}`) : 'Todas las sedes');
+      });
+
+
+      window.dispatchEvent(new CustomEvent("sede:changed",{detail:{id: sedeId, name: sedeName}}));
+      toast(`${btn.getAttribute("data-sedelect")}: ${sedeName}`); 
+    }
+  });
+
+    function updateSedeLabel(){
+      const n = localStorage.getItem("selectedSedeName") || "";
+      if(lBl) lBl.textContent=n? `Sede: ${n}`: "";
+    }
+  }
+
 
   document.addEventListener('DOMContentLoaded', () => {
     if (window.__TOKYO_BOOTED) return;
@@ -126,6 +175,7 @@
     initStyle1UI();
     initSedeSelector();
     initMockActions();
+    initCardAction();
 
     // Page-specific initialization (see ui-filtros.js)
     const page = document.body.getAttribute('data-page');

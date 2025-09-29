@@ -316,26 +316,6 @@
     }
   }
 
-  //!-------------------------------------------------
-  function mostrarSucursalesEnMapa(sucursales) {
-    map.eachLayer((layer) => {
-      if (layer instanceof L.Marker) map.removeLayer(layer);
-    });
-
-    sucursales.forEach((sucursal) => {
-      if (sucursal.latitud && sucursal.longitud) {
-        L.marker([sucursal.latitud, sucursal.longitud])
-          .addTo(map)
-          .bindPopup(sucursal.nombre);
-      }
-    });
-    const group = L.featureGroup(
-      sucursales.map((s) => L.marker([s.latitud, s.longitud]))
-    );
-    if (sucursales.length > 0) map.fitBounds(group.getBounds().pad(0.2));
-  }
-  //!--------------------------------------------------------------------
-
   async function initSucursales() {
     try {
       const sedeId = localStorage.getItem("selectedSedeId") || "";
@@ -668,3 +648,46 @@ async function initPlatillo() {
 })();
 
 
+
+
+
+
+
+
+ document.addEventListener('DOMContentLoaded', function(){
+  if(document.body.dataset.page !== 'sucursales') return;
+
+  const contenedor = document.getElementById('mapa');
+  if(!contenedor) return;
+
+  const map = L.map(contenedor).setView([24.04195, -104.65779], 12);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 16
+  }).addTo(map);
+
+  const markers = {
+    "1": L.marker([24.04195, -104.65779]).addTo(map).bindPopup('Sucursal Forestal'),
+    "2": L.marker([23.99704, -104.66227]).addTo(map).bindPopup('Sucursal Domingo Arrieta')
+  };
+
+  function centerMap(id){
+    if(markers[id]){
+      map.setView(markers[id].getLatLng(),14);
+      markers[id].openPopup();
+    } else {
+      const group = L.featureGroup(Object.values(markers));
+      map.fitBounds(group.getBounds().pad(0.2));
+    }
+  }
+
+  window.addEventListener('load', () => map.invalidateSize());
+  window.addEventListener('resize', () => map.invalidateSize());
+
+  window.addEventListener("sede:changed", (e) => {
+    centerMap(e.detail.id);
+  });
+  const savedSedeId = localStorage.getItem('selectedSedeId');
+  if(savedSedeId) centerMap(savedSedeId);
+});
