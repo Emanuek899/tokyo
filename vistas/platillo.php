@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Tokyo Sushi - Platillo'; $slug = $_GET['slug'] ?? 'sushi-roll'; ?>
+<?php $pageTitle = 'Tokyo Sushi - Platillo'; $slug = $_GET['slug'] ?? 'sushi-roll'; $id = isset($_GET['id']) ? (int)$_GET['id'] : 0; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -22,17 +22,15 @@
       <div class="container">
         <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 2rem;">
           <div>
-            <div class="grid grid--auto" style="--cols: 3; gap: .5rem;">
-              <img src="assets/img/placeholder.svg" alt="Foto 1 platillo">
-              <img src="assets/img/placeholder.svg" alt="Foto 2 platillo">
-              <img src="assets/img/placeholder.svg" alt="Foto 3 platillo">
-            </div>
+            <div id="platillo-galeria" class="grid grid--auto" style="--cols: 3; gap: .5rem;" aria-live="polite"></div>
           </div>
-          <div >
-            <div class="section-header"><h2>Detalle de platillo</h2></div>
+          <div>
+            <div class="section-header"><h2 id="platillo-titulo">Detalle de platillo</h2></div>
+            <p id="platillo-desc" class="muted"></p>
             <p class="muted">Descripción breve del platillo seleccionado (slug: <?= htmlspecialchars($slug) ?>).</p>
-            <div class=" mt-3 flex items-center gap-3">
-              <strong class="price" style="font-size:1.25rem;"> $129.00</strong>
+            <div class="mt-3 flex items-center gap-3">
+              <strong id="platillo-precio" style="font-size:1.25rem;"></strong>
+              <strong style="font-size:1.25rem;">$129.00</strong>
               <?php include __DIR__.'/components/chips-etiquetas.php'; ?>
             </div>
             <div class="mt-3">
@@ -58,4 +56,5 @@
   <?php include __DIR__.'/partials/footer.php'; ?>
 </body>
 </html>
+
 
