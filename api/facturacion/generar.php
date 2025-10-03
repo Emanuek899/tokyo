@@ -5,8 +5,10 @@ $BASE = dirname(__DIR__, 2);
 // Rutas robustas para config y utils (soporta estructura con /backend)
 $CFG = is_file($BASE . '/config/db.php') ? ($BASE . '/config/db.php') : ($BASE . '/backend/config/db.php');
 $UTL = is_file($BASE . '/utils/response.php') ? ($BASE . '/utils/response.php') : ($BASE . '/backend/utils/response.php');
+$FCT = is_file($BASE . '/config/facturama.php') ? ($BASE . '/config/facturama.php') : ($BASE . '/backend/config/facturama.php');
 require_once $CFG;
 require_once $UTL;
+if (is_file($FCT)) require_once $FCT;
 
 function getTicketId(PDO $pdo, int $ticketId, int $folioIn): int {
     // a) Si viene un ticketId válido y existe por ID, úsalo.
@@ -104,7 +106,7 @@ try {
     $impuestos = 0.0; // Ajusta si requieres IVA
     $total = (float)$ticket['total'];
 
-    // Insertar factura
+    // Insertar factura (temporal; se actualizará con datos de Facturama)
     $folioFactura = 'F-' . $ticket['folio'];
     $uuid = bin2hex(random_bytes(8));
     $insF = $pdo->prepare('
@@ -124,6 +126,78 @@ try {
         $cant = (int)$row['cantidad'];
         $pu   = (float)$row['precio_unitario'];
         $insD->execute([$facturaId, (int)$row['id'], (int)$row['producto_id'], $row['producto'], $cant, $pu, $cant * $pu]);
+    }
+
+    // Si existe integración Facturama, intentar timbrar ahora
+    if (function_exists('facturama_create_cfdi')) {
+        // Traer datos del cliente para receptor
+        $clQ = $pdo->prepare('SELECT * FROM clientes_facturacion WHERE id = ? LIMIT 1');
+        $clQ->execute([$clienteId]);
+        $cli = $clQ->fetch(PDO::FETCH_ASSOC) ?: [];
+
+        // Valores por defecto de forma/método de pago
+        $formaPago = '03'; // Transferencia
+        $metodoPago = 'PUE';
+        $usoCfdi = (string)($cli['uso_cfdi'] ?? 'G03');
+
+        // Construir payload como arreglo (no JSON)
+        $fields = [
+            'CfdiType' => 'I',
+            'ExpeditionPlace' => function_exists('FacturamaCfg\expeditionPlace') ? FacturamaCfg::expeditionPlace() : (getenv('FACTURAMA_EXPEDITION_PLACE') ?: '34217'),
+            'PaymentForm' => $formaPago,
+            'PaymentMethod' => $metodoPago,
+            'Currency' => 'MXN',
+            // Emisor se toma de la cuenta; receptor desde los campos abajo
+            'Receiver[Rfc]' => (string)($cli['rfc'] ?? ''),
+            'Receiver[Name]' => (string)($cli['razon_social'] ?? ''),
+            'Receiver[CfdiUse]' => $usoCfdi,
+            // Totales (el servicio puede recalcular, pero enviamos por claridad)
+            'SubTotal' => number_format($subtotal, 2, '.', ''),
+            'Total' => number_format($total, 2, '.', ''),
+        ];
+
+        // Conceptos
+        $idx = 0;
+        foreach ($detalles as $row) {
+            $cant = (int)$row['cantidad'];
+            $pu   = (float)$row['precio_unitario'];
+            $desc = (string)($row['producto'] ?? ('Producto #' . (int)$row['producto_id']));
+            $fields["Items[$idx][ProductCode]"] = '01010101';
+            $fields["Items[$idx][IdentificationNumber]"] = (string)((int)$row['producto_id']);
+            $fields["Items[$idx][Description]"] = $desc;
+            $fields["Items[$idx][Unit]"] = 'Pieza';
+            $fields["Items[$idx][UnitCode]"] = 'H87';
+            $fields["Items[$idx][UnitPrice]"] = number_format($pu, 2, '.', '');
+            $fields["Items[$idx][Quantity]"] = $cant;
+            $fields["Items[$idx][Subtotal]"] = number_format($cant * $pu, 2, '.', '');
+            $fields["Items[$idx][TaxObject]"] = '01'; // No objeto de impuesto
+            $idx++;
+        }
+
+        try {
+            $resp = facturama_create_cfdi($fields);
+            // Esperamos campos comunes
+            $facturamaId = (string)($resp['Id'] ?? ($resp['id'] ?? ''));
+            $uuidResp    = (string)($resp['Uuid'] ?? ($resp['uuid'] ?? ''));
+            $serieResp   = (string)($resp['Serie'] ?? '');
+            $folioResp   = isset($resp['Folio']) ? (string)$resp['Folio'] : ((string)($resp['FolioInt'] ?? ''));
+
+            // Links
+            $pdfUrl = '';
+            $xmlUrl = '';
+            if (isset($resp['Links']) && is_array($resp['Links'])) {
+                $pdfUrl = (string)($resp['Links']['Pdf'] ?? ($resp['Links']['PdfUrl'] ?? ''));
+                $xmlUrl = (string)($resp['Links']['Xml'] ?? ($resp['Links']['XmlUrl'] ?? ''));
+            }
+
+            // Actualizar factura local
+            $up = $pdo->prepare('UPDATE facturas SET facturama_id=?, uuid=?, serie=?, folio=?, metodo_pago=?, forma_pago=?, uso_cfdi=?, xml_path=?, pdf_path=? WHERE id=?');
+            $up->execute([$facturamaId ?: null, $uuidResp ?: null, $serieResp ?: null, $folioResp ?: $folioFactura, $metodoPago, $formaPago, $usoCfdi, $xmlUrl ?: null, $pdfUrl ?: null, $facturaId]);
+        } catch (Throwable $fe) {
+            // Si falla Facturama, revertimos todo
+            $pdo->rollBack();
+            json_error('Error al timbrar con Facturama', 502, $fe->getMessage());
+        }
     }
 
     // Respuesta desde vistas

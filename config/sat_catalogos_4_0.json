@@ -1,0 +1,28 @@
+{
+  "regimenes": [
+    { "code": "605", "descripcion": "Sueldos y Salarios e Ingresos Asimilados a Salarios", "persona": "F" },
+    { "code": "612", "descripcion": "Personas Físicas con Actividades Empresariales y Profesionales", "persona": "F" },
+    { "code": "601", "descripcion": "General de Ley Personas Morales", "persona": "M" },
+    { "code": "616", "descripcion": "Sin obligaciones fiscales", "persona": "F" }
+  ],
+  "usos": [
+    { "code": "G01", "descripcion": "Adquisición de mercancías", "persona": "AMBOS" },
+    { "code": "G03", "descripcion": "Gastos en general", "persona": "AMBOS" },
+    { "code": "S01", "descripcion": "Sin efectos fiscales", "persona": "AMBOS" },
+    { "code": "D01", "descripcion": "Honorarios médicos, dentales y hospitalarios", "persona": "F" },
+    { "code": "D02", "descripcion": "Gastos médicos por incapacidad o discapacidad", "persona": "F" },
+    { "code": "D03", "descripcion": "Gastos funerales", "persona": "F" },
+    { "code": "D04", "descripcion": "Donativos", "persona": "F" },
+    { "code": "D05", "descripcion": "Intereses reales efectivamente pagados por créditos hipotecarios (casa habitación)", "persona": "F" },
+    { "code": "D06", "descripcion": "Aportaciones voluntarias al SAR", "persona": "F" },
+    { "code": "D07", "descripcion": "Primas por seguros de gastos médicos", "persona": "F" },
+    { "code": "D08", "descripcion": "Gastos de transportación escolar obligatoria", "persona": "F" }
+  ],
+  "compatibilidad": [
+    { "regimen": "605", "usos": ["D01","D02","D03","D04","D05","D06","D07","D08"] },
+    { "regimen": "612", "usos": ["G01","G03","S01","D01","D02","D03","D04","D05","D06","D07","D08"] },
+    { "regimen": "601", "usos": ["G01","G03","S01"] },
+    { "regimen": "616", "usos": ["S01"] }
+  ]
+}
+
