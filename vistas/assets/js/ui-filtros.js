@@ -595,17 +595,27 @@ async function initPlatillo() {
     if (!id) return;
     try {
       let abierto = true;
+      
       try {
         const res = await fetch('../api/corte_caja/verificar_corte_abierto.php', { credentials:'same-origin' });
-        if (res.ok) { const j = await res.json(); abierto = !!(j && j.resultado && j.resultado.abierto); }
+        if (res.ok) { 
+          const j = await res.json(); 
+          abierto = !!(j && j.resultado && j.resultado.abierto); 
+        }
       } catch(e2){}
-      if (!abierto) { toast('El establecimiento seleccionado se encuentra fuera del horario de operaciones'); return; }
+      
+      if (!abierto) { 
+        toast('El establecimiento seleccionado se encuentra fuera del horario de operaciones'); 
+        return; 
+      }
       await API.carrito.agregar({ producto_id: id, cantidad: 1 });
       toast('Agregado al carrito');
     } catch(err){
       console.error(err);
       const msg = String((err && err.message) || '');
-      if (msg.indexOf(' 409') !== -1) toast('El establecimiento seleccionado se encuentra fuera del horario de operaciones');
+      if (msg.indexOf(' 409') !== -1){
+        toast('El establecimiento seleccionado se encuentra fuera del horario de operaciones');
+      } 
       else toast('No se pudo agregar');
     }
   });
