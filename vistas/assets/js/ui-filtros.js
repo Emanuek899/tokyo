@@ -406,8 +406,8 @@
         if (resp.items.length === 0){
           console.log("carrito no tiene nada");
           tbody.innerHTML = `
-            <tr>
-              <td>El carrito esta vacio</td>
+            <tr colspan="4">
+              <td colspan="4" class="text-center">El carrito esta vacio</td>
             </tr>`;
         }else if ((resp.items||[]).length) {
           tbody.innerHTML = resp.items.map(it => `
@@ -431,6 +431,9 @@
       } catch(e){ console.warn('No se pudo cargar carrito de sesión', e); }
     }
 
+    /**
+     * Recalcula el precio del carrito
+     */
     async function recalc(){
       const items = Array.from(
         table.querySelectorAll(
@@ -463,17 +466,22 @@
 
     // Inicializar con backend si está disponible
     if (window.API && API.carrito && API.carrito.listar) { loadFromSession(); } else { recalc(); }
+    
     table.addEventListener('input', async (e)=>{
       if(!e.target.matches('.qty')) return;
       const tr = e.target.closest('tr');
       const id = parseInt(tr.getAttribute('data-item-id'),10)||0;
       const cantidad = Math.max(0, parseInt(e.target.value||'0',10)||0);
       if (window.API && API.carrito && API.carrito.actualizar) {
-        try { await API.carrito.actualizar({ producto_id: id, cantidad }); await loadFromSession(); } catch(err){ console.error(err); }
+        try { 
+          await API.carrito.actualizar({ producto_id: id, cantidad }); 
+          await loadFromSession(); } 
+          catch(err){ console.error(err); }
       } else {
         recalc();
       }
     });
+    
     table.addEventListener('click', async (e)=>{
       if (!e.target.classList.contains('btn-del')) return;
       const tr = e.target.closest('tr');
@@ -484,8 +492,10 @@
         tr.remove(); recalc();
       }
     });
+
     document.getElementById('btn-recalcular')?.addEventListener('click', recalc);
   }
+  
   async function initCheckout(){ /* estÃ¡tico */ }
 
   async function initFacturacion(){
@@ -553,7 +563,7 @@
 
 // Integración de carrito (agregar desde menú) y checkout mínimo
 (function(){
-  // Agregar al carrito desde cards del menú
+  // Agregar al carrito desde boton de cards del menú
   document.addEventListener('click', async (e) => {
     const btn = e.target.closest('.btn-add-cart');
     if (!btn) return;

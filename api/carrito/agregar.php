@@ -9,20 +9,23 @@ try {
     if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
         json_error('Método no permitido', 405);
     }
+    $pdo = DB::get();
+    $c = corte_abierto($pdo);
+    // Validación: requiere corte de caja abierto
+    if (empty($c['abierto'])) {
+        $data = [
+            'success'=>false,
+            'error'=>'No hay corte de caja abierto',
+            'details'=>'Abra un corte para poder tomar pedidos',
+        ];
+        json_response($data, 409);
+        exit;
+    }    
     $input = json_decode(file_get_contents('php://input'), true) ?: [];
     $producto_id = (int)($input['producto_id'] ?? 0);
     $cantidad = (int)($input['cantidad'] ?? 0);
     if ($producto_id <= 0 || $cantidad <= 0) {
         json_error('Datos inválidos', 422);
-    }
-    // Validación: requiere corte de caja abierto
-    $pdo = DB::get();
-    $c = corte_abierto($pdo);
-    if (empty($c['abierto'])) {
-        http_response_code(409);
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(['success'=>false,'error'=>'No hay corte de caja abierto','details'=>'Abra un corte para poder tomar pedidos'], JSON_UNESCAPED_UNICODE);
-        exit;
     }
     cart_add($producto_id, $cantidad);
     json_response(['success'=>true,'ok' => true, 'carrito' => cart_get_all()]);

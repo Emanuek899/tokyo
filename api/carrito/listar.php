@@ -11,6 +11,7 @@ try {
     $cart = cart_get_all();
     if (empty($cart)) {
         json_response(['items' => [], 'subtotal' => 0, 'envio' => 0, 'total' => 0]);
+        exit;
     }
     $pdo = DB::get();
     $ids = array_keys($cart);

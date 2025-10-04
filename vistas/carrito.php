@@ -23,18 +23,6 @@
                     <tr><th>Producto</th><th style="width:140px">Cantidad</th><th>Precio</th><th>Subtotal</th></tr>
                   </thead>
                   <tbody>
-                    <tr data-item-id="5">
-                      <td>Rollo California</td>
-                      <td><input class="input qty" type="number" min="0" value="1"></td>
-                      <td class="precio">$--</td>
-                      <td class="subtotal">$--</td>
-                    </tr>
-                    <tr data-item-id="36">
-                      <td>Gyozas</td>
-                      <td><input class="input qty" type="number" min="0" value="2"></td>
-                      <td class="precio">$--</td>
-                      <td class="subtotal">$--</td>
-                    </tr>
                   </tbody>
                 </table>
                 <div class="mt-3"><button id="btn-recalcular" class="btn custom-btn btn--sm">Recalcular</button></div>

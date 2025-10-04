@@ -22,9 +22,12 @@ try {
         $pdo = DB::get();
         $c = corte_abierto($pdo);
         if (empty($c['abierto'])) {
-            http_response_code(409);
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(['success'=>false,'error'=>'No hay corte de caja abierto','details'=>'Abra un corte para poder tomar pedidos'], JSON_UNESCAPED_UNICODE);
+            $data = [
+                'success'=>false,
+                'error'=>'No hay corte de caja abierto',
+                'details'=>'Abra un corte para poder tomar pedidos'
+            ];
+            json_response($data, 409);
             exit;
         }
     }

@@ -11,7 +11,16 @@ try {
         json_error('Entrada inválida', 422);
     }
     $items = $input['items'];
-    $ids = array_values(array_unique(array_filter(array_map(fn($i)=> (int)($i['id'] ?? 0), $items), fn($v)=>$v>0)));
+    $ids = array_values(
+        array_unique(
+            array_filter(
+                array_map(
+                    fn($i)=> (int)($i['id'] ?? 0), $items
+                ),
+                fn($v)=>$v>0
+            )
+        )
+    );
     if (!$ids) json_response(['items'=>[], 'subtotal'=>0, 'envio'=>0, 'total'=>0]);
 
     $pdo = DB::get();
