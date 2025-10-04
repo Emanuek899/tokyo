@@ -259,28 +259,6 @@ a:focus {
     }
 }
 
-@media (max-width: 767.98px) {
-    .carousel,
-    .carousel .carousel-item,
-    .carousel .carousel-text {
-        height: calc(100vh - 70px);
-    }
-    
-    .carousel .carousel-text h1 {
-        font-size: 30px;
-    }
-    
-    .carousel .carousel-text .btn {
-        padding: 10px 25px;
-        font-size: 15px;
-        letter-spacing: 0;
-    }
-    .carrito{
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-}
-
 @media (max-width: 575.98px) {
     .carousel .carousel-text h1 {
         font-size: 25px;
@@ -1724,4 +1702,49 @@ a:focus {
 
 .carousel-inner{
   overflow: visible;
+}
+
+/* nav mobile */
+.menu-toggle{
+    position: absolute;
+    left: 100%;
+    background-color: red;
+}
+
+.nav-mobile{
+    display: none;
+}
+
+.nav-mobile svg{
+    width: 30px;
+}
+
+@media (max-width: 700px) {
+    .carousel,
+    .carousel .carousel-item,
+    .carousel .carousel-text {
+        height: calc(100vh - 70px);
+    }
+    
+    .carousel .carousel-text h1 {
+        font-size: 30px;
+    }
+    
+    .carousel .carousel-text .btn {
+        padding: 10px 25px;
+        font-size: 15px;
+        letter-spacing: 0;
+    }
+    .carrito{
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .nav-mobile{
+        display: block;
+    }
+
+    .navbar-desk{
+        display: none;
+    }
 }
