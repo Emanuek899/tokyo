@@ -1719,6 +1719,12 @@ a:focus {
     width: 30px;
 }
 
+.nav-mobile div{
+    background-color: #1a1a1a !important;
+    position: absolute;
+    right: 0;
+}
+
 @media (max-width: 700px) {
     .carousel,
     .carousel .carousel-item,
