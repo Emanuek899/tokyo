@@ -1,69 +1,52 @@
-// ui-filtros.js — UI de ejemplo para renderizar datos y filtros
+// ui-filtros.js â€” UI de ejemplo para renderizar datos y filtros
 
-(function () {
-  const $ = (s, c = document) => c.querySelector(s);
-  const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
+(function(){
+  const $ = (s, c=document) => c.querySelector(s);
+  const $$ = (s, c=document) => Array.from(c.querySelectorAll(s));
 
-  function resolveImage(src) {
-    const baseUpload = "upload/productos/";
-    if (!src || typeof src !== "string" || !src.trim())
-      return "assets/img/placeholder.svg";
-    if (/^https?:\/\//i.test(src)) return src; // URL absoluta
-    if (src.startsWith("assets/")) return src; // asset local
-    if (src.startsWith("upload/productos/")) return src;
-    if (src.startsWith("productos/"))
-      return baseUpload + src.replace(/^productos\//, "");
-    if (src.startsWith("upload/"))
-      return baseUpload + src.replace(/^upload\//, "");
-    if (src.startsWith("/")) return src; // ruta absoluta provista por el servidor
+  function resolveImage(src){
+    const baseUpload = 'upload/productos/';
+    if(!src || typeof src !== 'string' || !src.trim()) return 'assets/img/placeholder.svg';
+    if(/^https?:\/\//i.test(src)) return src; // URL absoluta
+    if(src.startsWith('assets/')) return src;  // asset local
+    if(src.startsWith('upload/productos/')) return src;
+    if(src.startsWith('productos/')) return baseUpload + src.replace(/^productos\//,'');
+    if(src.startsWith('upload/')) return baseUpload + src.replace(/^upload\//,'');
+    if(src.startsWith('/')) return src; // ruta absoluta provista por el servidor
     return baseUpload + src; // nombre simple
   }
 
-  function el(html) {
-    const t = document.createElement("template");
+  function el(html){
+    const t = document.createElement('template');
     t.innerHTML = html.trim();
     return t.content.firstElementChild;
-  
   }
 
-  /**
-   * Funcion para generar cards de producto
-   * @param {} p
-   * @returns
-   */
-  function productCard(p) {
-    const tags = (p.tags || [])
-      .map(
-        (t) =>
-          `<span class="chip"><span class="chip__dot" style="background:${tagColor(
-            t
-          )}"></span>${t}</span>`
-      )
-      .join("");
+/**
+ * Funcion para generar cards de producto
+ * @param {} p 
+ * @returns 
+ */
+  function productCard(p){
+    const tags = (p.tags||[]).map(t => `<span class="chip"><span class="chip__dot" style="background:${tagColor(t)}"></span>${t}</span>`).join('');
     const stateBadge = stateToBadge(p.estado);
     const imgSrc = resolveImage(p.imagen);
     return `
-    <article class="card card--product flex column" data-name="${(
-      p.nombre || ""
-    ).toLowerCase()}" data-category="${p.categoria || ""}" data-tags="${(
-      p.tags || []
-    ).join(",")}">
-      <a class="media" href="platillo.php?slug=${encodeURIComponent(
-        p.slug || ""
-      )}" aria-label="Ver ${p.nombre || ""}">
-        <img src="${imgSrc}" alt="${p.nombre || ""}">
+    <article class="card card--product flex column" data-name="${(p.nombre||'').toLowerCase()}" data-category="${p.categoria||''}" data-tags="${(p.tags||[]).join(',')}">
+      <a class="media" href="platillo.php?id=${encodeURIComponent(p.id||'')}" aria-label="Ver ${p.nombre||''}">
+        <img src="${imgSrc}" alt="${p.nombre||''}">
       </a>
       <div class="card__body">
         <div class="flex justify-between items-center">
-          <h3 class="title">${p.nombre || ""}</h3>
-          <div class="price">$${Number(p.precio_final || 0).toFixed(2)}MX</div>
+          <h3 class="title">${p.nombre||''}</h3>
+          <div class="price">$${Number(p.precio_final||0).toFixed(2)}MX</div>
         </div>
         <div class="badges">${stateBadge}</div>
         <div class="mt-2">${tags}</div>
         <div class="description text-center">${p.descripcion || "sin descripcion"}</div>
       </div>
       <div class="card__footer flex justify-between items-center bottom">
-        <span class="text-muted">${p.categoria_nombre || "Producto"}</span>
+        <span class="text-muted">${p.categoria_nombre||'Producto'}</span>
         <button class="btn custom-btn btn--sm btn-add-cart" data-id="${p.id}">Agregar</button>
       </div>
     </article>`;
@@ -72,48 +55,42 @@
   /**
    * Funcion para generar etiquetas de estado de producto
    * Disponible|Agotado|Fuera_horario
-   *
-   * @param {} st
+   * 
+   * @param {} st 
    * @return
    */
-  function stateToBadge(st) {
-    if (st === "agotado")
-      return '<span class="badge badge--danger">Agotado</span>';
-    if (st === "fuera_horario")
-      return '<span class="badge badge--muted">Fuera de horario</span>';
+  function stateToBadge(st){
+    if(st === 'agotado') return '<span class="badge badge--danger">Agotado</span>';
+    if(st === 'fuera_horario') return '<span class="badge badge--muted">Fuera de horario</span>';
     return '<span class="badge badge--success">Disponible</span>';
   }
 
-  /**
-   * Funcion para cambiar color de etiquetas
-   * @param {*} tag
-   * @returns
-   */
-  function tagColor(tag) {
-    switch (tag) {
-      case "spicy":
-        return "#e65100";
-      case "veg":
-        return "#2e7d32";
-      case "gluten_free":
-        return "#1565c0";
-      default:
-        return "var(--color-accent)";
+/**
+ * Funcion para cambiar color de etiquetas
+ * @param {*} tag 
+ * @returns 
+ */
+  function tagColor(tag){
+    switch(tag){
+      case 'spicy': return '#e65100';
+      case 'veg': return '#2e7d32';
+      case 'gluten_free': return '#1565c0';
+      default: return 'var(--color-accent)';
     }
   }
 
-  /**
-   * Funcion para generar cards de productos en promocion
-   *
-   * @param {*} pr
-   * @returns
-   */
-  function promoCard(pr) {
+/**
+ * Funcion para generar cards de productos en promocion
+ * 
+ * @param {*} pr 
+ * @returns 
+ */
+  function promoCard(pr){
     return `
     <article class="card card--promo">
       <div class="card__body">
         <h3 class="title">${pr.nombre}</h3>
-        <p class="rule text-muted">${pr.regla} · <strong>${pr.vigencia}</strong></p>
+        <p class="rule text-muted">${pr.regla} Â· <strong>${pr.vigencia}</strong></p>
       </div>
       <div class="card__footer flex justify-between items-center">
         <span class="badge badge--muted">${pr.tipo}</span>
@@ -122,25 +99,20 @@
     </article>`;
   }
 
-  /**
-   * Funcion para generar
-   * @param {} s
-   * @returns
-   */
-  function branchCard(s) {
-    const title = s.nombre || s.colonia || "Sede";
-    const ciudad = s.ciudad ? ` · ${s.ciudad}` : "";
-    const direccion = s.direccion
-      ? `<p class="text-muted">${s.direccion}</p>`
-      : "";
-    const telefono = s.telefono
-      ? `<p class="text-muted">Tel: ${s.telefono}</p>`
-      : "";
-    const horario = `<p class="text-muted">Horario: ${s.horario || "—"}</p>`;
-    const servicios =
-      Array.isArray(s.servicios) && s.servicios.length
-        ? `<p class="text-muted">Servicios: ${s.servicios.join(", ")}</p>`
-        : "";
+/**
+ * Funcion para generar
+ * @param {} s 
+ * @returns 
+ */
+  function branchCard(s){
+    const title = s.nombre || s.colonia || 'Sede';
+    const ciudad = s.ciudad ? ` Â· ${s.ciudad}` : '';
+    const direccion = s.direccion ? `<p class="text-muted">${s.direccion}</p>` : '';
+    const telefono = s.telefono ? `<p class="text-muted">Tel: ${s.telefono}</p>` : '';
+    const horario = `<p class="text-muted">Horario: ${s.horario || 'â€”'}</p>`;
+    const servicios = (Array.isArray(s.servicios) && s.servicios.length)
+      ? `<p class="text-muted">Servicios: ${s.servicios.join(', ')}</p>`
+      : '';
     return `
     <article class="card" data-sede-id="${s.id}">
       <div class="card__body">
@@ -154,252 +126,227 @@
     </article>`;
   }
 
-  async function initHome() {
-    async function loadPromos() {
-      try {
-        const promos = await API.promos.listar();
-        $("#home-promos").innerHTML = promos
-          .slice(0, 3)
-          .map(promoCard)
-          .join("");
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    async function loadSucursales() {
-      try {
-        const sedeId = localStorage.getItem("selectedSedeId") || "";
-        const sucs = await API.sucursales.listar(
-          sedeId ? { sede_id: sedeId } : {}
-        );
-        $("#home-sucursales").innerHTML = sucs
-          .slice(0, 3)
-          .map(branchCard)
-          .join("");
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    async function loadTop() {
-      try {
-        const top = await API.menu.top();
-        $("#home-top").innerHTML = top.slice(0, 4).map(productCard).join("");
-      } catch (e) {
-        console.error(e);
-      }
-    }
+  async function initHome(){
+    async function loadPromos(){ try { const promos = await API.promos.listar(); $('#home-promos').innerHTML = promos.slice(0,3).map(promoCard).join(''); } catch(e) { console.error(e); } }
+    async function loadSucursales(){ try { const sucs = await API.sucursales.listar({ __noSede: true }); $('#home-sucursales').innerHTML = sucs.slice(0,3).map(branchCard).join(''); } catch(e) { console.error(e); } }
+    async function loadTop(){ try { const top = await API.menu.top(); $('#home-top').innerHTML = top.slice(0,4).map(productCard).join(''); } catch(e) { console.error(e); } }
     await Promise.all([loadPromos(), loadSucursales(), loadTop()]);
-    window.addEventListener("sede:changed", async () => {
-      await loadSucursales();
-      await loadTop();
-      await loadPromos();
-    });
+    window.addEventListener('sede:changed', async () => { await loadSucursales(); await loadTop(); });
   }
 
   let __TOKYO_MENU_BOUND = false;
   let __TOKYO_MENU_DEBOUNCE;
-  async function initMenu() {
-    if (__TOKYO_MENU_BOUND) return;
-    __TOKYO_MENU_BOUND = true;
-    const grid = $("#grid-productos");
-    const q = $("#buscar");
-    const chips = $$("#chips-filtros .chip");
-    const ordenar = $("#ordenar");
-    const render = (items) => {
-      grid.innerHTML = (items || []).map(productCard).join("");
-    
-    };
-    
+  async function initMenu(){
+    if (__TOKYO_MENU_BOUND) return; __TOKYO_MENU_BOUND = true;
+    const grid = $('#grid-productos');
+    const q = $('#buscar');
+    const chips = $$('#chips-filtros .chip');
+    const ordenar = $('#ordenar');
+    const pagInfo = $('#paginacion-info');
+    const pagNav  = $('#paginacion-nav');
+    const render = (items) => { grid.innerHTML = (items||[]).map(productCard).join(''); };
+    let currentPage = 1;
+    let perPage = 24;
+    let lastTotal = 0;
 
-    function normalizeOrden(by, term) {
-      let v = (by || "").trim();
-      if (v === "precio-asc") v = "precio_asc";
-      if (v === "precio-desc") v = "precio_desc";
-      if (v === "relevancia" && !term) v = "nombre";
-      if (!v) v = "nombre";
+    function renderPaginator(total, page, per){
+      const totalPages = Math.max(1, Math.ceil((Number(total)||0) / (Number(per)||1)));
+      const start = total ? ((page - 1) * per + 1) : 0;
+      const end = Math.min(total, page * per);
+      if (pagInfo) {
+        pagInfo.textContent = `Mostrando ${start}-${end} de ${total}`;
+      }
+      if (!pagNav) return;
+      const maxButtons = 5;
+      let html = '';
+      const prevDisabled = page <= 1;
+      html += `<a class="page-link${prevDisabled?' disabled':''}" href="#" data-page="${page-1}" aria-disabled="${prevDisabled?'true':'false'}">Anterior</a>`;
+      let pStart = Math.max(1, page - Math.floor(maxButtons/2));
+      let pEnd = Math.min(totalPages, pStart + maxButtons - 1);
+      if (pEnd - pStart + 1 < maxButtons) {
+        pStart = Math.max(1, pEnd - maxButtons + 1);
+      }
+      for (let p = pStart; p <= pEnd; p++){
+        const active = p === page;
+        html += `<a class="page-link${active?' active':''}" href="#" data-page="${p}" ${active? 'aria-current="page"' : ''}>${p}</a>`;
+      }
+      const nextDisabled = page >= totalPages;
+      html += `<a class="page-link${nextDisabled?' disabled':''}" href="#" data-page="${page+1}" aria-disabled="${nextDisabled?'true':'false'}">Siguiente</a>`;
+      pagNav.innerHTML = html;
+    }
+
+    function normalizeOrden(by, term){
+      let v = (by||'').trim();
+      if (v === 'precio-asc') v = 'precio_asc';
+      if (v === 'precio-desc') v = 'precio_desc';
+      if (v === 'relevancia' && !term) v = 'nombre';
+      if (!v) v = 'nombre';
       return v;
     }
 
-    //Filtro de categorias
-    function applyClientFilters(items, { term, catId, ordenar }) {
-      const t = (term || "").toLowerCase();
+    //Filtro de categorias (helper antiguo; ya no se usa para paginaciÃ³n server)
+    function applyClientFilters(items, { term, catId, ordenar }){
+      const t = (term||'').toLowerCase();
       let list = Array.isArray(items) ? items.slice() : [];
       if (t) {
-        list = list.filter((it) => {
-          const n = String(it.nombre || "").toLowerCase();
-          const d = String(it.descripcion || "").toLowerCase();
-          const c = String(it.categoria || "").toLowerCase();
+        list = list.filter(it => {
+          const n = String(it.nombre||'').toLowerCase();
+          const d = String(it.descripcion||'').toLowerCase();
+          const c = String(it.categoria||'').toLowerCase();
           return n.includes(t) || d.includes(t) || c.includes(t);
         });
       }
       if (catId) {
-        const idn = parseInt(catId, 10) || 0;
-        list = list.filter((it) => {
-          const cid =
-            "categoria_id" in it ? parseInt(it.categoria_id, 10) || 0 : null;
-          return cid ? cid === idn : true; // si no hay campo, no filtrar
+        const idn = parseInt(catId,10)||0;
+        list = list.filter(it => {
+          const cid = ('categoria_id' in it) ? parseInt(it.categoria_id,10)||0 : null;
+          return cid ? (cid === idn) : true; // si no hay campo, no filtrar
         });
       }
       const by = ordenar;
-      if (by === "precio_asc" || by === "precio_desc") {
-        list.sort(
-          (a, b) =>
-            (Number(a.precio_final ?? a.precio ?? 0) -
-              Number(b.precio_final ?? b.precio ?? 0)) *
-            (by === "precio_asc" ? 1 : -1)
-        );
-      } else if (by === "relevancia" && t) {
-        list.sort((a, b) => {
-          const an = String(a.nombre || "").toLowerCase();
-          const bn = String(b.nombre || "").toLowerCase();
+      if (by === 'precio_asc' || by === 'precio_desc'){
+        list.sort((a,b) => (Number(a.precio_final ?? a.precio ?? 0) - Number(b.precio_final ?? b.precio ?? 0)) * (by==='precio_asc'?1:-1));
+      } else if (by === 'relevancia' && t){
+        list.sort((a,b) => {
+          const an = String(a.nombre||'').toLowerCase();
+          const bn = String(b.nombre||'').toLowerCase();
           const ap = an.startsWith(t) ? 0 : 1;
           const bp = bn.startsWith(t) ? 0 : 1;
           if (ap !== bp) return ap - bp;
           return an.localeCompare(bn);
         });
-      } else {
-        // nombre por defecto
-        list.sort((a, b) =>
-          String(a.nombre || "").localeCompare(String(b.nombre || ""))
-        );
+      } else { // nombre por defecto
+        list.sort((a,b) => String(a.nombre||'').localeCompare(String(b.nombre||'')));
       }
       return list;
     }
-    async function load() {
-      const term = (q?.value || "").trim();
-      const catIds = chips
-        .filter((c) => c.getAttribute("data-active") === "true")
-        .map((c) => c.getAttribute("data-cat-id"));
-      const byRaw = (ordenar?.value || "nombre").trim();
+    async function load(){
+      const term = (q?.value || '').trim();
+      const catIds = chips.filter(c => c.getAttribute('data-active') === 'true').map(c => c.getAttribute('data-cat-id'));
+      const byRaw = (ordenar?.value || 'nombre').trim();
       const byParam = normalizeOrden(byRaw, term);
-      const params = { search: term, ordenar: byParam };
+      const params = { search: term, ordenar: byParam, page: currentPage, per_page: perPage };
       if (catIds.length) params.categoria_id = catIds[0];
       try {
-        const data = await (window.apiGet
-          ? window.apiGet("/menu/listar.php", params)
-          : API.menu.listar(params));
+        const data = await (window.apiGet ? window.apiGet('/menu/listar.php', params) : API.menu.listar(params));
         const items = data?.items ?? data ?? [];
-        const out = applyClientFilters(items, {
-          term,
-          catId: params.categoria_id,
-          ordenar: byParam,
-        });
-        render(out);
-      } catch (e) {
-        console.error(e);
-      }
+        // Usar paginaciÃ³n del backend
+        render(items);
+        if (typeof data?.total === 'number') lastTotal = data.total;
+        if (typeof data?.page === 'number') currentPage = data.page;
+        if (typeof data?.per_page === 'number') perPage = data.per_page;
+        renderPaginator(lastTotal, currentPage, perPage);
+      } catch(e){ console.error(e); }
     }
     load();
-    if (q)
-      q.addEventListener("input", () => {
-        clearTimeout(__TOKYO_MENU_DEBOUNCE);
-        __TOKYO_MENU_DEBOUNCE = setTimeout(() => load(), 250);
-      });
-    chips.forEach((ch) =>
-      ch.addEventListener("click", () => {
-        ch.setAttribute(
-          "data-active",
-          ch.getAttribute("data-active") === "true" ? "false" : "true"
-        );
-        load();
-      })
-    );
-    if (ordenar) ordenar.addEventListener("change", () => load());
-  }
+    if (q) q.addEventListener('input', ()=>{ clearTimeout(__TOKYO_MENU_DEBOUNCE); __TOKYO_MENU_DEBOUNCE = setTimeout(()=> { currentPage = 1; load(); }, 250); });
+    chips.forEach(ch => ch.addEventListener('click', ()=>{ ch.setAttribute('data-active', ch.getAttribute('data-active') === 'true' ? 'false' : 'true'); currentPage = 1; load(); }));
+    if (ordenar) ordenar.addEventListener('change', ()=> { currentPage = 1; load(); });
+    if (pagNav) pagNav.addEventListener('click', (e) => {
+      const a = e.target.closest('[data-page]');
+      if (!a) return;
+      e.preventDefault();
+      if (a.getAttribute('aria-disabled') === 'true' || a.classList.contains('disabled')) return;
+      const to = parseInt(a.getAttribute('data-page'), 10) || 1;
+      const totalPages = Math.max(1, Math.ceil((Number(lastTotal)||0) / (Number(perPage)||1)));
+      if (to < 1 || to > totalPages || to === currentPage) return;
+      currentPage = to;
+      load();
+    });
+    window.addEventListener('sede:changed', () => { currentPage = 1; load(); });
 
-  async function initPromos() {
-    try {
-      const promos = await API.promos.listar();
-      $("#lista-promos").innerHTML = promos.map(promoCard).join("");
-    } catch (e) {
-      console.error(e);
+    // Agregar al carrito desde cards del menú
+    if (grid) {
+      grid.addEventListener('click', async (e) => {
+        const btn = e.target.closest('button[data-toast]');
+        if (!btn || btn.classList.contains('btn-add-cart')) return;
+        const card = btn.closest('.card');
+        const a = card ? card.querySelector('a.media[href*="platillo.php?id="]') : null;
+        if (!a) return;
+        try {
+          const u = new URL(a.getAttribute('href'), window.location.origin);
+          const id = parseInt(u.searchParams.get('id')||'0', 10) || 0;
+          if (!id) return;
+          if (window.API && API.carrito && API.carrito.agregar) {
+            await API.carrito.agregar({ producto_id: id, cantidad: 1 });
+            toast('Agregado al carrito');
+          }
+        } catch(err){ console.error(err); toast('No se pudo agregar'); }
+      });
     }
   }
 
-  //!-------------------------------------------------
-  function mostrarSucursalesEnMapa(sucursales) {
-    map.eachLayer((layer) => {
-      if (layer instanceof L.Marker) map.removeLayer(layer);
-    });
+  async function initPromos(){
+    try{ const promos = await API.promos.listar(); $('#lista-promos').innerHTML = promos.map(promoCard).join(''); }catch(e){ console.error(e); }
+  }
 
-    sucursales.forEach((sucursal) => {
-      if (sucursal.latitud && sucursal.longitud) {
-        L.marker([sucursal.latitud, sucursal.longitud])
-          .addTo(map)
-          .bindPopup(sucursal.nombre);
+  async function initPlatillo(){
+    const params = new URLSearchParams(window.location.search);
+    const id = parseInt(params.get('id')||'0', 10) || 0;
+    const $title = document.getElementById('platillo-titulo');
+    const $desc  = document.getElementById('platillo-desc');
+    const $precio= document.getElementById('platillo-precio');
+    const $gal   = document.getElementById('platillo-galeria');
+    const staticDesc = Array.from(document.querySelectorAll('p.muted')).find(p => p && !p.id);
+    const staticPrice = Array.from(document.querySelectorAll('strong')).find(s => s.textContent && s.textContent.includes('$') && !s.id);
+    try {
+      if(!id){
+        if($title) $title.textContent = 'Platillo';
+        if($desc) $desc.textContent = 'ID de platillo no especificado.';
+        return;
       }
-    });
-    const group = L.featureGroup(
-      sucursales.map((s) => L.marker([s.latitud, s.longitud]))
-    );
-    if (sucursales.length > 0) map.fitBounds(group.getBounds().pad(0.2));
+      const resp = await API.menu.obtener({ id });
+      const p = resp?.item || resp;
+      if(!p){
+        if($title) $title.textContent = 'Platillo';
+        if($desc) $desc.textContent = 'No se encontrÃ³ el platillo.';
+        return;
+      }
+      if($title) $title.textContent = p.nombre || 'Platillo';
+      if($desc) $desc.textContent = p.descripcion || '';
+      if(staticDesc && $desc && ($desc.textContent !== '')) { staticDesc.style.display = 'none'; }
+      const precio = Number(p.precio_final ?? p.precio ?? 0);
+      if($precio) $precio.textContent = `$${precio.toFixed(2)}`;
+      if(staticPrice && $precio && $precio.textContent) { staticPrice.style.display = 'none'; }
+      if($gal){
+        const img = resolveImage(p.imagen);
+        $gal.innerHTML = '';
+        const im = document.createElement('img');
+        im.src = img; im.alt = p.nombre || 'Foto del platillo';
+        im.style.gridColumn = 'span 3';
+        $gal.appendChild(im);
+      }
+      // Botón agregar al carrito en detalle
+      const addBtn = document.querySelector('button.btn-add-cart') || document.querySelector('button[data-toast]');
+      if (addBtn && window.API && API.carrito && API.carrito.agregar) {
+        addBtn.addEventListener('click', async (ev) => {
+          ev.preventDefault();
+          try { await API.carrito.agregar({ producto_id: id, cantidad: 1 }); toast('Agregado al carrito'); }
+          catch(err){ console.error(err); toast('No se pudo agregar'); }
+        });
+      }
+    } catch(e){ console.error(e); }
   }
-  //!--------------------------------------------------------------------
 
-  async function initSucursales() {
-    try {
-      const sedeId = localStorage.getItem("selectedSedeId") || "";
-      const data = await API.sucursales.listar({sedeId}); 
-      console.log(data);
-      $("#lista-sucursales").innerHTML = data.map(branchCard).join("");
+
+  async function initSucursales(){
+    try{
+      const data = await API.sucursales.listar({ __noSede: true });
+      $('#lista-sucursales').innerHTML = data.map(branchCard).join('');
       mostrarSucursalesEnMapa(data);
-      const name = localStorage.getItem("selectedSedeName") || "";
-      $("#mapa").textContent =
-        "Mapa placeholder " + (name ? `(Sede: ${name})` : "(todas las sedes)");
-      window.addEventListener("sede:changed", async (ev) => {
-        const id = ev.detail?.id || "";
-        const list = await API.sucursales.listar(id ? { sede_id: id } : {});
-        $("#lista-sucursales").innerHTML = list.map(branchCard).join("");
+      const name = localStorage.getItem('selectedSedeName') || '';
+      $('#mapa').textContent = 'Mapa placeholder '+(name? `(Sede: ${name})` : '(todas las sedes)');
+      window.addEventListener('sede:changed', async (ev) => {
+        const list = await API.sucursales.listar({ __noSede: true });
+        $('#lista-sucursales').innerHTML = list.map(branchCard).join('');
         mostrarSucursalesEnMapa(list);
-        const nm = ev.detail?.name || "";
-        $("#mapa").textContent =
-          "Mapa placeholder " + (nm ? `(Sede: ${nm})` : "(todas las sedes)");
+        const nm = ev.detail?.name || '';
+        $('#mapa').textContent = 'Mapa placeholder '+(nm? `(Sede: ${nm})` : '(todas las sedes)');
       });
-    } catch (e) {
-      console.error(e);
-    }
+    }catch(e){ console.error(e); }
   }
 
-async function initPlatillo() {
-  const container = document.querySelector('main');
-  const params = new URLSearchParams(window.location.search);
-  const slug = decodeURIComponent(params.get('slug') || '');
-  console.log('Nombre Slug(platillo):', slug);
-
-  try {
-    const { items } = await API.menu.listar();
-    console.log('Productos obtenidos:', items);
-
-    const normalizeSlug = (str) =>str.replace(/[^\w-]+/g, ''); 
-    const platillo = items.find(p => normalizeSlug(p.nombre) === normalizeSlug(slug));
-    console.log('Platillo encontrado:', platillo);
-    if (!platillo) {
-      container.innerHTML = '<p> <h2>Platillo no encontrado. </h2></p>';
-      return;
-    }
-    document.querySelector('.section-header h2').textContent = platillo.nombre;
-    document.querySelector('.muted ').textContent = platillo.descripcion || 'Sin descripción';
-    document.querySelector('.price').textContent = `$${Number(platillo.precio_final).toFixed(2)} MX`;
-    const imgs = document.querySelectorAll('.grid--auto img');
-    if (imgs.length) {
-      imgs.forEach((img, idx) => {
-        img.src = idx === 0 && platillo.imagen ? `assets/img/${platillo.imagen}` : 'assets/img/placeholder.svg';
-        img.alt = platillo.nombre;
-      });
-    }
-
-  } catch (error) {
-    console.error('Error al cargar el platillo:', error);
-    container.innerHTML = '<p>Platillo no encontrado.</p>';
-  }
-}
-
-
-
-  
-
-
-    async function initCarrito(){
+  async function initCarrito(){
     const table = document.getElementById('tabla-carrito');
     if(!table) return;
     const resumen = document.getElementById('resumen');
@@ -410,7 +357,6 @@ async function initPlatillo() {
     function selectCashTier(subtotal){ const tiers=(window.FeesCfg?.cash?.tiers)||[]; for(const t of tiers){ if(t.threshold==null || subtotal < Number(t.threshold)) return t; } return tiers.length?tiers[tiers.length-1]:null; }
     function grossUp(p,r,f,iva,min){ const denom=1-(1+iva)*r; if(Math.abs(denom)<1e-9) return {total:p,surcharge:0}; let A=(p+(1+iva)*f)/denom; const C1=((A*r)+f)*(1+iva); const Cmin=(min!=null)?(min*(1+iva)):null; if(Cmin!=null && C1<Cmin){ A=p+Cmin; } return { total:A, surcharge:A-p } }
     function computeSurcharge(subtotal, method){ if(!window.PassThroughFees) return { total:subtotal, surcharge:0 }; if(method==='card'){ const f=window.FeesCfg?.card||{rate:0,fixed:0,iva:0,min_fee:null}; return grossUp(subtotal, Number(f.rate||0), Number(f.fixed||0), Number(f.iva||0), f.min_fee!=null?Number(f.min_fee):null); } if(method==='bank_transfer' || method==='spei'){ const f=window.FeesCfg?.spei||{fixed:0,iva:0}; const s=(1+Number(f.iva||0))*Number(f.fixed||0); return { total:subtotal+s, surcharge:s }; } if(method==='cash'){ const cfg=window.FeesCfg?.cash||{iva:0,tiers:[]}; const t=selectCashTier(subtotal)||{rate:0,fixed:0,min_fee:null}; return grossUp(subtotal, Number(t.rate||0), Number(t.fixed||0), Number(cfg.iva||0), t.min_fee!=null?Number(t.min_fee):null); } return { total:subtotal, surcharge:0 }; }
-    
     // Intentar poblar desde sesión del backend si existe API de carrito
     async function loadFromSession(){
       try {
@@ -439,7 +385,6 @@ async function initPlatillo() {
         }
       } catch(e){ console.warn('No se pudo cargar carrito de sesión', e); }
     }
-    
     async function recalc(){
       const items = Array.from(table.querySelectorAll('tbody tr')).map(tr => ({ id: parseInt(tr.getAttribute('data-item-id'),10)||0, cantidad: parseInt(tr.querySelector('.qty')?.value||'0',10)||0 }));
       try {
@@ -461,7 +406,6 @@ async function initPlatillo() {
         if($sumTotal) $sumTotal.textContent = `$${Number((calc.total||subtotal)+envio).toFixed(2)}`;
       } catch(e){ console.error(e); }
     }
-    
     // Inicializar con backend si está disponible
     if (window.API && API.carrito && API.carrito.listar) { loadFromSession(); } else { recalc(); }
     table.addEventListener('input', async (e)=>{
@@ -487,101 +431,68 @@ async function initPlatillo() {
     });
     document.getElementById('btn-recalcular')?.addEventListener('click', recalc);
   }
-  async function initCheckout() {
-    /* estático */
-  }
+  async function initCheckout(){ /* estÃ¡tico */ }
 
-  async function initFacturacion() {
+  async function initFacturacion(){
     const $r = (id) => document.getElementById(id);
-    const btn = $r("btn-generar-fact");
-    if (!btn) return;
-    btn.addEventListener("click", async () => {
+    const btn = $r('btn-generar-fact');
+    if(!btn) return;
+    btn.addEventListener('click', async () => {
       const payload = {
-        rfc: $r("fact-rfc")?.value?.trim(),
-        razon_social: $r("fact-razon")?.value?.trim(),
-        correo: $r("fact-correo")?.value?.trim(),
-        telefono: $r("fact-telefono")?.value?.trim(),
-        calle: $r("fact-calle")?.value?.trim(),
-        numero_ext: $r("fact-numero-ext")?.value?.trim(),
-        numero_int: $r("fact-numero-int")?.value?.trim(),
-        colonia: $r("fact-colonia")?.value?.trim(),
-        municipio: $r("fact-municipio")?.value?.trim(),
-        estado: $r("fact-estado")?.value?.trim(),
-        pais: $r("fact-pais")?.value?.trim(),
-        cp: $r("fact-cp")?.value?.trim(),
-        regimen: $r("fact-regimen")?.value?.trim(),
-        uso_cfdi: $r("fact-uso")?.value?.trim(),
+        rfc: $r('fact-rfc')?.value?.trim(),
+        razon_social: $r('fact-razon')?.value?.trim(),
+        correo: $r('fact-correo')?.value?.trim(),
+        telefono: $r('fact-telefono')?.value?.trim(),
+        calle: $r('fact-calle')?.value?.trim(),
+        numero_ext: $r('fact-numero-ext')?.value?.trim(),
+        numero_int: $r('fact-numero-int')?.value?.trim(),
+        colonia: $r('fact-colonia')?.value?.trim(),
+        municipio: $r('fact-municipio')?.value?.trim(),
+        estado: $r('fact-estado')?.value?.trim(),
+        pais: $r('fact-pais')?.value?.trim(),
+        cp: $r('fact-cp')?.value?.trim(),
+        regimen: $r('fact-regimen')?.value?.trim(),
+        uso_cfdi: $r('fact-uso')?.value?.trim()
       };
-      const ticketId = parseInt($r("fact-ticket-id")?.value || "0", 10) || 0;
-      const out = $r("fact-resumen");
-      if (!payload.rfc || !payload.razon_social || !ticketId) {
-        toast("Completa RFC, Razón social y Ticket ID");
-        return;
-      }
+      const ticketId = parseInt($r('fact-ticket-id')?.value||'0',10)||0;
+      const out = $r('fact-resumen');
+      if(!payload.rfc || !payload.razon_social || !ticketId){ toast('Completa RFC, RazÃ³n social y Ticket ID'); return; }
       try {
         const c = await API.facturacion.registrarCliente(payload);
         const clienteId = c?.cliente?.id;
-        if (!clienteId) throw new Error("Cliente no generado");
-        const fact = await API.facturacion.generar({
-          ticket_id: ticketId,
-          cliente_id: clienteId,
-        });
-        const f = fact?.factura;
-        const det = fact?.detalles || [];
-        if (!f) {
-          throw new Error("No se obtuvo la factura");
-        }
+        if(!clienteId) throw new Error('Cliente no generado');
+        const fact = await API.facturacion.generar({ ticket_id: ticketId, cliente_id: clienteId });
+        const f = fact?.factura; const det = fact?.detalles||[];
+        if(!f){ throw new Error('No se obtuvo la factura'); }
         out.innerHTML = `
           <div class="mt-2">
-            <p><strong>Factura:</strong> ${f.folio || f.factura_id} · ${
-          f.uuid || ""
-        }</p>
-            <p class="text-muted">Ticket #${
-              f.ticket_folio || f.ticket_id
-            } · Total: $${Number(f.total || 0).toFixed(2)}</p>
+            <p><strong>Factura:</strong> ${f.folio || f.factura_id} Â· ${f.uuid || ''}</p>
+            <p class="text-muted">Ticket #${f.ticket_folio || f.ticket_id} Â· Total: $${Number(f.total||0).toFixed(2)}</p>
           </div>
           <div class="mt-3">
             <h3>Conceptos</h3>
             <ul>
-              ${det
-                .map(
-                  (d) =>
-                    `<li>${d.cantidad} × ${d.descripcion} — $${Number(
-                      d.importe || 0
-                    ).toFixed(2)}</li>`
-                )
-                .join("")}
+              ${det.map(d=>`<li>${d.cantidad} Ã— ${d.descripcion} â€” $${Number(d.importe||0).toFixed(2)}</li>`).join('')}
             </ul>
           </div>`;
-        toast("Factura generada");
-      } catch (e) {
-        console.error(e);
-        toast("Error al generar factura");
-      }
+        toast('Factura generada');
+      } catch(e){ console.error(e); toast('Error al generar factura'); }
     });
   }
 
   window.UI = {
-    initPage: function (page) {
-      switch (page) {
-        case "home":
-          return initHome();
-        case "menu":
-          return initMenu();
-        case "promos":
-          return initPromos();
-        case "sucursales":
-          return initSucursales();
-        case "platillo":
-          return initPlatillo();
-        case "carrito":
-          return initCarrito();
-        case "checkout":
-          return initCheckout();
-        case "facturacion":
-          return initFacturacion();
+    initPage: function(page){
+      switch(page){
+        case 'home': return initHome();
+        case 'menu': return initMenu();
+        case 'promos': return initPromos();
+        case 'sucursales': return initSucursales();
+        case 'platillo': return initPlatillo();
+        case 'carrito': return initCarrito();
+        case 'checkout': return initCheckout();
+        case 'facturacion': return initFacturacion();
       }
-    },
+    }
   };
 })();
 
@@ -677,4 +588,40 @@ async function initPlatillo() {
   });
 })();
 
+ document.addEventListener('DOMContentLoaded', function(){
+  if(document.body.dataset.page !== 'sucursales') return;
 
+  const contenedor = document.getElementById('mapa');
+  if(!contenedor) return;
+
+  const map = L.map(contenedor).setView([24.04195, -104.65779], 12);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 16
+  }).addTo(map);
+
+  const markers = {
+    "1": L.marker([24.04195, -104.65779]).addTo(map).bindPopup('Sucursal Forestal'),
+    "2": L.marker([23.99704, -104.66227]).addTo(map).bindPopup('Sucursal Domingo Arrieta')
+  };
+
+  function centerMap(id){
+    if(markers[id]){
+      map.setView(markers[id].getLatLng(),14);
+      markers[id].openPopup();
+    } else {
+      const group = L.featureGroup(Object.values(markers));
+      map.fitBounds(group.getBounds().pad(0.2));
+    }
+  }
+
+  window.addEventListener('load', () => map.invalidateSize());
+  window.addEventListener('resize', () => map.invalidateSize());
+
+  window.addEventListener("sede:changed", (e) => {
+    centerMap(e.detail.id);
+  });
+  const savedSedeId = localStorage.getItem('selectedSedeId');
+  if(savedSedeId) centerMap(savedSedeId);
+});

@@ -1,0 +1,232 @@
+{
+    "ts": "2025-09-25 06:16:22",
+    "label": "FACTURAMA_REQUEST",
+    "ip": "127.0.0.1",
+    "data": {
+        "rid": "92077783",
+        "method": "GET",
+        "path": "/api/BranchOffice",
+        "url": "https://apisandbox.facturama.mx/api/BranchOffice",
+        "payload_type": "none",
+        "payload": []
+    }
+}
+{
+    "ts": "2025-09-25 06:16:24",
+    "label": "FACTURAMA_REQUEST",
+    "ip": "127.0.0.1",
+    "data": {
+        "rid": "80259175",
+        "method": "GET",
+        "path": "/api/BranchOffice",
+        "url": "https://apisandbox.facturama.mx/api/BranchOffice",
+        "payload_type": "none",
+        "payload": []
+    }
+}
+{
+    "ts": "2025-09-25 06:17:00",
+    "label": "FACTURAMA_REQUEST",
+    "ip": "127.0.0.1",
+    "data": {
+        "rid": "75626317",
+        "method": "GET",
+        "path": "/api/BranchOffice",
+        "url": "https://apisandbox.facturama.mx/api/BranchOffice",
+        "payload_type": "none",
+        "payload": []
+    }
+}
+{
+    "ts": "2025-09-25 06:17:00",
+    "label": "CFDI_TO_FACTURAMA",
+    "ip": "127.0.0.1",
+    "data": {
+        "from": "timbrar",
+        "ticket_id": 203,
+        "cfdi": {
+            "Serie": "A",
+            "Currency": "MXN",
+            "ExpeditionPlace": "34217",
+            "CfdiType": "I",
+            "PaymentMethod": "PUE",
+            "PaymentForm": "04",
+            "Receiver": {
+                "Rfc": "XAXX010101000",
+                "Name": "PUBLICO EN GENERAL",
+                "FiscalRegime": "616",
+                "TaxZipCode": "34217",
+                "CfdiUse": "S01"
+            },
+            "Items": [
+                {
+                    "ProductCode": "01010101",
+                    "IdentificationNumber": "78",
+                    "Description": "Aderezo de Cilantro",
+                    "Unit": "Pieza",
+                    "UnitCode": "H87",
+                    "UnitPrice": 12.931034,
+                    "Quantity": 1,
+                    "Subtotal": 12.931034,
+                    "Taxes": [
+                        {
+                            "Name": "IVA",
+                            "Base": 12.931034,
+                            "Rate": 0.16,
+                            "IsRetention": false,
+                            "FactorType": "Tasa",
+                            "Total": 2.068965
+                        }
+                    ],
+                    "Total": 15,
+                    "TaxObject": "02"
+                },
+                {
+                    "ProductCode": "01010101",
+                    "IdentificationNumber": "99",
+                    "Description": "Aguachile Especial Roll",
+                    "Unit": "Pieza",
+                    "UnitCode": "H87",
+                    "UnitPrice": 133.62069,
+                    "Quantity": 1,
+                    "Subtotal": 133.62069,
+                    "Taxes": [
+                        {
+                            "Name": "IVA",
+                            "Base": 133.62069,
+                            "Rate": 0.16,
+                            "IsRetention": false,
+                            "FactorType": "Tasa",
+                            "Total": 21.37931
+                        }
+                    ],
+                    "Total": 155,
+                    "TaxObject": "02"
+                }
+            ],
+            "GlobalInformation": {
+                "Periodicity": "01",
+                "Months": "09",
+                "Year": 2025
+            }
+        }
+    }
+}
+{
+    "ts": "2025-09-25 06:17:00",
+    "label": "FACTURAMA_REQUEST",
+    "ip": "127.0.0.1",
+    "data": {
+        "rid": "71097557",
+        "method": "POST",
+        "path": "/api/3/cfdis",
+        "url": "https://apisandbox.facturama.mx/api/3/cfdis",
+        "payload_type": "json",
+        "payload": {
+            "Serie": "A",
+            "Currency": "MXN",
+            "ExpeditionPlace": "34217",
+            "CfdiType": "I",
+            "PaymentMethod": "PUE",
+            "PaymentForm": "04",
+            "Receiver": {
+                "Rfc": "XAXX010101000",
+                "Name": "PUBLICO EN GENERAL",
+                "FiscalRegime": "616",
+                "TaxZipCode": "34217",
+                "CfdiUse": "S01"
+            },
+            "Items": [
+                {
+                    "ProductCode": "01010101",
+                    "IdentificationNumber": "78",
+                    "Description": "Aderezo de Cilantro",
+                    "Unit": "Pieza",
+                    "UnitCode": "H87",
+                    "UnitPrice": 12.931034,
+                    "Quantity": 1,
+                    "Subtotal": 12.931034,
+                    "Taxes": [
+                        {
+                            "Name": "IVA",
+                            "Base": 12.931034,
+                            "Rate": 0.16,
+                            "IsRetention": false,
+                            "FactorType": "Tasa",
+                            "Total": 2.068965
+                        }
+                    ],
+                    "Total": 15,
+                    "TaxObject": "02"
+                },
+                {
+                    "ProductCode": "01010101",
+                    "IdentificationNumber": "99",
+                    "Description": "Aguachile Especial Roll",
+                    "Unit": "Pieza",
+                    "UnitCode": "H87",
+                    "UnitPrice": 133.62069,
+                    "Quantity": 1,
+                    "Subtotal": 133.62069,
+                    "Taxes": [
+                        {
+                            "Name": "IVA",
+                            "Base": 133.62069,
+                            "Rate": 0.16,
+                            "IsRetention": false,
+                            "FactorType": "Tasa",
+                            "Total": 21.37931
+                        }
+                    ],
+                    "Total": 155,
+                    "TaxObject": "02"
+                }
+            ],
+            "GlobalInformation": {
+                "Periodicity": "01",
+                "Months": "09",
+                "Year": 2025
+            }
+        }
+    }
+}
+{
+    "ts": "2025-09-25 06:17:01",
+    "label": "FACTURAMA_HTTP_ERROR",
+    "ip": "127.0.0.1",
+    "data": {
+        "rid": "71097557",
+        "http": 400,
+        "response": "{\"Message\":\"La solicitud no es válida.\",\"ModelState\":{\"cfdiToCreate.items[0].Total\":[\"El cálculo del total es incorrecto.\"]}}"
+    }
+}
+{
+    "ts": "2025-09-25 06:17:01",
+    "label": "FACTURAMA_TIMBRAR_ERROR",
+    "ip": "127.0.0.1",
+    "data": {
+        "from": "timbrar",
+        "ticket_id": 203,
+        "message": "Facturama HTTP 400: {\"Message\":\"La solicitud no es válida.\",\"ModelState\":{\"cfdiToCreate.items[0].Total\":[\"El cálculo del total es incorrecto.\"]}}"
+    }
+}{"ts":"2025-09-25 06:26:41","label":"FACTURAMA_REQUEST","ip":"127.0.0.1","data":{"rid":"94631660","method":"GET","path":"/api/BranchOffice","url":"https://apisandbox.facturama.mx/api/BranchOffice","payload_type":"none","payload":[]}}
+{"ts":"2025-09-25 06:27:07","label":"FACTURAMA_REQUEST","ip":"127.0.0.1","data":{"rid":"91780736","method":"GET","path":"/api/BranchOffice","url":"https://apisandbox.facturama.mx/api/BranchOffice","payload_type":"none","payload":[]}}
+{"ts":"2025-09-25 06:27:07","label":"CFDI_TO_FACTURAMA","ip":"127.0.0.1","data":{"from":"timbrar","ticket_id":203,"cfdi":{"Serie":"A","Currency":"MXN","ExpeditionPlace":"34217","CfdiType":"I","PaymentMethod":"PUE","PaymentForm":"04","Receiver":{"Rfc":"XAXX010101000","Name":"PUBLICO EN GENERAL","FiscalRegime":"616","TaxZipCode":"34217","CfdiUse":"S01"},"Items":[{"ProductCode":"01010101","IdentificationNumber":"78","Description":"Aderezo de Cilantro","Unit":"Pieza","UnitCode":"H87","UnitPrice":12.931034,"Quantity":1,"Subtotal":12.93,"Taxes":[{"Name":"IVA","Base":12.93,"Rate":0.16,"IsRetention":false,"FactorType":"Tasa","Total":2.07}],"Total":15,"TaxObject":"02"},{"ProductCode":"01010101","IdentificationNumber":"99","Description":"Aguachile Especial Roll","Unit":"Pieza","UnitCode":"H87","UnitPrice":133.62069,"Quantity":1,"Subtotal":133.62,"Taxes":[{"Name":"IVA","Base":133.62,"Rate":0.16,"IsRetention":false,"FactorType":"Tasa","Total":21.38}],"Total":155,"TaxObject":"02"}],"GlobalInformation":{"Periodicity":"01","Months":"09","Year":2025}}}}
+{"ts":"2025-09-25 06:27:07","label":"FACTURAMA_REQUEST","ip":"127.0.0.1","data":{"rid":"17848796","method":"POST","path":"/api/3/cfdis","url":"https://apisandbox.facturama.mx/api/3/cfdis","payload_type":"json","payload":{"Serie":"A","Currency":"MXN","ExpeditionPlace":"34217","CfdiType":"I","PaymentMethod":"PUE","PaymentForm":"04","Receiver":{"Rfc":"XAXX010101000","Name":"PUBLICO EN GENERAL","FiscalRegime":"616","TaxZipCode":"34217","CfdiUse":"S01"},"Items":[{"ProductCode":"01010101","IdentificationNumber":"78","Description":"Aderezo de Cilantro","Unit":"Pieza","UnitCode":"H87","UnitPrice":12.931034,"Quantity":1,"Subtotal":12.93,"Taxes":[{"Name":"IVA","Base":12.93,"Rate":0.16,"IsRetention":false,"FactorType":"Tasa","Total":2.07}],"Total":15,"TaxObject":"02"},{"ProductCode":"01010101","IdentificationNumber":"99","Description":"Aguachile Especial Roll","Unit":"Pieza","UnitCode":"H87","UnitPrice":133.62069,"Quantity":1,"Subtotal":133.62,"Taxes":[{"Name":"IVA","Base":133.62,"Rate":0.16,"IsRetention":false,"FactorType":"Tasa","Total":21.38}],"Total":155,"TaxObject":"02"}],"GlobalInformation":{"Periodicity":"01","Months":"09","Year":2025}}}}
+{"ts":"2025-09-25 06:34:19","label":"FACTURAMA_REQUEST","ip":"127.0.0.1","data":{"rid":"29988987","method":"GET","path":"/api/BranchOffice","url":"https://apisandbox.facturama.mx/api/BranchOffice","payload_type":"none","payload":[]}}
+{"ts":"2025-09-25 06:34:20","label":"CFDI_TO_FACTURAMA","ip":"127.0.0.1","data":{"from":"timbrar","ticket_id":205,"cfdi":{"Serie":"A","Currency":"MXN","ExpeditionPlace":"34217","CfdiType":"I","PaymentMethod":"PUE","PaymentForm":"04","Receiver":{"Rfc":"XAXX010101000","Name":"PUBLICO EN GENERAL","FiscalRegime":"616","TaxZipCode":"34217","CfdiUse":"S01"},"Items":[{"ProductCode":"01010101","IdentificationNumber":"99","Description":"Aguachile Especial Roll","Unit":"Pieza","UnitCode":"H87","UnitPrice":133.62069,"Quantity":1,"Subtotal":133.62,"Taxes":[{"Name":"IVA","Base":133.62,"Rate":0.16,"IsRetention":false,"FactorType":"Tasa","Total":21.38}],"Total":155,"TaxObject":"02"},{"ProductCode":"01010101","IdentificationNumber":"77","Description":"Aderezo de Chipotle","Unit":"Pieza","UnitCode":"H87","UnitPrice":8.62069,"Quantity":1,"Subtotal":8.62,"Taxes":[{"Name":"IVA","Base":8.62,"Rate":0.16,"IsRetention":false,"FactorType":"Tasa","Total":1.38}],"Total":10,"TaxObject":"02"},{"ProductCode":"01010101","IdentificationNumber":"20","Description":"Bacon Cheese","Unit":"Pieza","UnitCode":"H87","UnitPrice":107.758621,"Quantity":1,"Subtotal":107.76,"Taxes":[{"Name":"IVA","Base":107.76,"Rate":0.16,"IsRetention":false,"FactorType":"Tasa","Total":17.24}],"Total":125,"TaxObject":"02"}],"GlobalInformation":{"Periodicity":"01","Months":"09","Year":2025}}}}
+{"ts":"2025-09-25 06:34:20","label":"FACTURAMA_REQUEST","ip":"127.0.0.1","data":{"rid":"21381881","method":"POST","path":"/api/3/cfdis","url":"https://apisandbox.facturama.mx/api/3/cfdis","payload_type":"json","payload":{"Serie":"A","Currency":"MXN","ExpeditionPlace":"34217","CfdiType":"I","PaymentMethod":"PUE","PaymentForm":"04","Receiver":{"Rfc":"XAXX010101000","Name":"PUBLICO EN GENERAL","FiscalRegime":"616","TaxZipCode":"34217","CfdiUse":"S01"},"Items":[{"ProductCode":"01010101","IdentificationNumber":"99","Description":"Aguachile Especial Roll","Unit":"Pieza","UnitCode":"H87","UnitPrice":133.62069,"Quantity":1,"Subtotal":133.62,"Taxes":[{"Name":"IVA","Base":133.62,"Rate":0.16,"IsRetention":false,"FactorType":"Tasa","Total":21.38}],"Total":155,"TaxObject":"02"},{"ProductCode":"01010101","IdentificationNumber":"77","Description":"Aderezo de Chipotle","Unit":"Pieza","UnitCode":"H87","UnitPrice":8.62069,"Quantity":1,"Subtotal":8.62,"Taxes":[{"Name":"IVA","Base":8.62,"Rate":0.16,"IsRetention":false,"FactorType":"Tasa","Total":1.38}],"Total":10,"TaxObject":"02"},{"ProductCode":"01010101","IdentificationNumber":"20","Description":"Bacon Cheese","Unit":"Pieza","UnitCode":"H87","UnitPrice":107.758621,"Quantity":1,"Subtotal":107.76,"Taxes":[{"Name":"IVA","Base":107.76,"Rate":0.16,"IsRetention":false,"FactorType":"Tasa","Total":17.24}],"Total":125,"TaxObject":"02"}],"GlobalInformation":{"Periodicity":"01","Months":"09","Year":2025}}}}
+{"ts":"2025-09-25 07:35:52","label":"REST_CFDI_TO_FACTURAMA","ip":"127.0.0.1","data":{"modo":"uno_a_uno","factura_id":13,"ticket_id":206,"cfdi":{"Serie":"A","Currency":"MXN","ExpeditionPlace":"34217","CfdiType":"I","PaymentMethod":"PUE","PaymentForm":"03","Receiver":{"Rfc":"XAXX010101000","Name":"PUBLICO EN GENERAL","FiscalRegime":"612","TaxZipCode":"34217","CfdiUse":"G01"},"Items":[{"ProductCode":"01010101","IdentificationNumber":"99","Description":"Aguachile Especial Roll","Unit":"Pieza","UnitCode":"H87","UnitPrice":133.62069,"Quantity":1,"Subtotal":133.62,"Taxes":[{"Name":"IVA","Base":133.62,"Rate":0.16,"IsRetention":false,"FactorType":"Tasa","Total":21.38}],"Total":155,"TaxObject":"02"},{"ProductCode":"01010101","IdentificationNumber":"76","Description":"Refresco (335ml)","Unit":"Pieza","UnitCode":"H87","UnitPrice":25,"Quantity":1,"Subtotal":25,"Taxes":[{"Name":"IVA","Base":25,"Rate":0.16,"IsRetention":false,"FactorType":"Tasa","Total":4}],"Total":29,"TaxObject":"02"}]}}}
+{"ts":"2025-09-25 07:35:52","label":"FACTURAMA_REQUEST","ip":"127.0.0.1","data":{"rid":"05179232","method":"POST","path":"/api/3/cfdis","url":"https://apisandbox.facturama.mx/api/3/cfdis","payload_type":"json","payload":{"Serie":"A","Currency":"MXN","ExpeditionPlace":"34217","CfdiType":"I","PaymentMethod":"PUE","PaymentForm":"03","Receiver":{"Rfc":"XAXX010101000","Name":"PUBLICO EN GENERAL","FiscalRegime":"612","TaxZipCode":"34217","CfdiUse":"G01"},"Items":[{"ProductCode":"01010101","IdentificationNumber":"99","Description":"Aguachile Especial Roll","Unit":"Pieza","UnitCode":"H87","UnitPrice":133.62069,"Quantity":1,"Subtotal":133.62,"Taxes":[{"Name":"IVA","Base":133.62,"Rate":0.16,"IsRetention":false,"FactorType":"Tasa","Total":21.38}],"Total":155,"TaxObject":"02"},{"ProductCode":"01010101","IdentificationNumber":"76","Description":"Refresco (335ml)","Unit":"Pieza","UnitCode":"H87","UnitPrice":25,"Quantity":1,"Subtotal":25,"Taxes":[{"Name":"IVA","Base":25,"Rate":0.16,"IsRetention":false,"FactorType":"Tasa","Total":4}],"Total":29,"TaxObject":"02"}]}}}
+{"ts":"2025-09-25 07:35:53","label":"FACTURAMA_HTTP_ERROR","ip":"127.0.0.1","data":{"rid":"05179232","http":400,"response":"{\"Message\":\"El Nodo (GlobalInformation) debe existir cuando el atributo Rfc del nodo receptor contiene el valor 'XAXX010101000' y el valor del atributo Nombre del nodo Receptor  contiene el valor 'PUBLICO EN GENERAL'.\"}"}}
+{"ts":"2025-09-25 07:35:53","label":"REST_FACTURAMA_ERROR","ip":"127.0.0.1","data":{"modo":"uno_a_uno","ticket_id":206,"error":"Facturama HTTP 400: {\"Message\":\"El Nodo (GlobalInformation) debe existir cuando el atributo Rfc del nodo receptor contiene el valor 'XAXX010101000' y el valor del atributo Nombre del nodo Receptor  contiene el valor 'PUBLICO EN GENERAL'.\"}"}}
+{"ts":"2025-09-25 07:35:53","label":"REST_CFDI_TO_FACTURAMA","ip":"127.0.0.1","data":{"modo":"uno_a_uno","factura_id":14,"ticket_id":207,"cfdi":{"Serie":"A","Currency":"MXN","ExpeditionPlace":"34217","CfdiType":"I","PaymentMethod":"PUE","PaymentForm":"03","Receiver":{"Rfc":"XAXX010101000","Name":"PUBLICO EN GENERAL","FiscalRegime":"612","TaxZipCode":"34217","CfdiUse":"G01"},"Items":[{"ProductCode":"01010101","IdentificationNumber":"72","Description":"Agua de Tamarindo","Unit":"Pieza","UnitCode":"H87","UnitPrice":30.172414,"Quantity":1,"Subtotal":30.17,"Taxes":[{"Name":"IVA","Base":30.17,"Rate":0.16,"IsRetention":false,"FactorType":"Tasa","Total":4.83}],"Total":35,"TaxObject":"02"},{"ProductCode":"01010101","IdentificationNumber":"17","Description":"Beef cheese","Unit":"Pieza","UnitCode":"H87","UnitPrice":102.586207,"Quantity":1,"Subtotal":102.59,"Taxes":[{"Name":"IVA","Base":102.59,"Rate":0.16,"IsRetention":false,"FactorType":"Tasa","Total":16.41}],"Total":119,"TaxObject":"02"}]}}}
+{"ts":"2025-09-25 07:35:53","label":"FACTURAMA_REQUEST","ip":"127.0.0.1","data":{"rid":"40721508","method":"POST","path":"/api/3/cfdis","url":"https://apisandbox.facturama.mx/api/3/cfdis","payload_type":"json","payload":{"Serie":"A","Currency":"MXN","ExpeditionPlace":"34217","CfdiType":"I","PaymentMethod":"PUE","PaymentForm":"03","Receiver":{"Rfc":"XAXX010101000","Name":"PUBLICO EN GENERAL","FiscalRegime":"612","TaxZipCode":"34217","CfdiUse":"G01"},"Items":[{"ProductCode":"01010101","IdentificationNumber":"72","Description":"Agua de Tamarindo","Unit":"Pieza","UnitCode":"H87","UnitPrice":30.172414,"Quantity":1,"Subtotal":30.17,"Taxes":[{"Name":"IVA","Base":30.17,"Rate":0.16,"IsRetention":false,"FactorType":"Tasa","Total":4.83}],"Total":35,"TaxObject":"02"},{"ProductCode":"01010101","IdentificationNumber":"17","Description":"Beef cheese","Unit":"Pieza","UnitCode":"H87","UnitPrice":102.586207,"Quantity":1,"Subtotal":102.59,"Taxes":[{"Name":"IVA","Base":102.59,"Rate":0.16,"IsRetention":false,"FactorType":"Tasa","Total":16.41}],"Total":119,"TaxObject":"02"}]}}}
+{"ts":"2025-09-25 07:35:54","label":"FACTURAMA_HTTP_ERROR","ip":"127.0.0.1","data":{"rid":"40721508","http":400,"response":"{\"Message\":\"El Nodo (GlobalInformation) debe existir cuando el atributo Rfc del nodo receptor contiene el valor 'XAXX010101000' y el valor del atributo Nombre del nodo Receptor  contiene el valor 'PUBLICO EN GENERAL'.\"}"}}
+{"ts":"2025-09-25 07:35:54","label":"REST_FACTURAMA_ERROR","ip":"127.0.0.1","data":{"modo":"uno_a_uno","ticket_id":207,"error":"Facturama HTTP 400: {\"Message\":\"El Nodo (GlobalInformation) debe existir cuando el atributo Rfc del nodo receptor contiene el valor 'XAXX010101000' y el valor del atributo Nombre del nodo Receptor  contiene el valor 'PUBLICO EN GENERAL'.\"}"}}
+
+
+
+{"ts":"2025-09-26 01:50:19","label":"FACTURAMA_REQUEST","ip":"127.0.0.1","data":{"rid":"77062245","method":"GET","path":"/api/BranchOffice","url":"https://apisandbox.facturama.mx/api/BranchOffice","payload_type":"none","payload":[]}}
+{"ts":"2025-09-26 01:50:49","label":"FACTURAMA_REQUEST","ip":"127.0.0.1","data":{"rid":"43736092","method":"GET","path":"/api/BranchOffice","url":"https://apisandbox.facturama.mx/api/BranchOffice","payload_type":"none","payload":[]}}
+{"ts":"2025-09-26 04:34:16","label":"FACTURAMA_REQUEST","ip":"127.0.0.1","data":{"rid":"74720047","method":"GET","path":"/api/BranchOffice","url":"https://apisandbox.facturama.mx/api/BranchOffice","payload_type":"none","payload":[]}}
