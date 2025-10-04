@@ -5,6 +5,7 @@ body {
     color: #4e4c4c;
     background: #1a1a1a;
     font-family: 'open sans', sans-serif;
+    min-width: 480px;
 }
 
 h1,
@@ -149,6 +150,12 @@ a:focus {
     background: #f8f9fa;
 }
 
+/* Carrito rules*/
+.carrito{
+    grid-template-columns: 1.5fr 1fr; 
+    gap: 2rem;
+}
+
 @media (min-width: 992px) {
     .navbar {
         position: absolute;
@@ -199,7 +206,6 @@ a:focus {
 @media (max-width: 991.98px) {   
     .navbar {
         padding: 15px;
-        background: #ffffff !important;
     }
     
     .navbar .navbar-brand {
@@ -212,6 +218,7 @@ a:focus {
     
     .navbar a.nav-link {
         padding: 5px;
+        color: #ffffff !important;
     }
     
     .navbar .dropdown-menu {
@@ -267,6 +274,10 @@ a:focus {
         padding: 10px 25px;
         font-size: 15px;
         letter-spacing: 0;
+    }
+    .carrito{
+        grid-template-columns: 1fr;
+        gap: 2rem;
     }
 }
 

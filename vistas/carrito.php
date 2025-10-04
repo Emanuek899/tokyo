@@ -8,7 +8,7 @@
   <?php include __DIR__.'/partials/header.php'; ?>
   <main>
     <section class="section">
-      <div class="container grid" style="grid-template-columns: 1.5fr 1fr; gap: 2rem;">
+      <div class="container grid carrito">
         <div>
           <div class="section-header"><h2>Tu carrito</h2></div>
           <div class="card">
