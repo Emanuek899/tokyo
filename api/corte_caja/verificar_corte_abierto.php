@@ -5,6 +5,10 @@ require_once dirname(__DIR__, 2) . '/config/db.php';
 require_once dirname(__DIR__, 2) . '/utils/response.php';
 require_once dirname(__DIR__, 2) . '/utils/corte.php';
 
+if (!isset($_SESSION['usuario_id'])){
+    $_SESSION['usuario_id'] = 1;
+}
+
 try {
     header('Content-Type: application/json; charset=utf-8');
     $pdo = DB::get();

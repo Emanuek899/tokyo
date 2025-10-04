@@ -254,26 +254,6 @@
       load();
     });
     window.addEventListener('sede:changed', () => { currentPage = 1; load(); });
-
-    // Agregar al carrito desde cards del menú
-    if (grid) {
-      grid.addEventListener('click', async (e) => {
-        const btn = e.target.closest('button[data-toast]');
-        if (!btn || btn.classList.contains('btn-add-cart')) return;
-        const card = btn.closest('.card');
-        const a = card ? card.querySelector('a.media[href*="platillo.php?id="]') : null;
-        if (!a) return;
-        try {
-          const u = new URL(a.getAttribute('href'), window.location.origin);
-          const id = parseInt(u.searchParams.get('id')||'0', 10) || 0;
-          if (!id) return;
-          if (window.API && API.carrito && API.carrito.agregar) {
-            await API.carrito.agregar({ producto_id: id, cantidad: 1 });
-            toast('Agregado al carrito');
-          }
-        } catch(err){ console.error(err); toast('No se pudo agregar'); }
-      });
-    }
   }
 
   async function initPromos(){
@@ -346,17 +326,76 @@
     }catch(e){ console.error(e); }
   }
 
+  /**
+   * Inicializa las funciones del carrito
+   * @returns 
+   */
   async function initCarrito(){
     const table = document.getElementById('tabla-carrito');
     if(!table) return;
     const resumen = document.getElementById('resumen');
-    const $sumSubtotal = resumen ? (resumen.querySelector('#sum-subtotal') || resumen.querySelector('div:nth-of-type(1) strong')) : null;
+    const $sumSubtotal = resumen ? (
+      resumen.querySelector('#sum-subtotal') || 
+      resumen.querySelector('div:nth-of-type(1) strong')) : null;
     const $sumFee = resumen ? resumen.querySelector('#sum-fee') : null;
-    const $sumEnvio = resumen ? (resumen.querySelector('#sum-envio') || resumen.querySelector('div:nth-of-type(3) strong')) : null;
-    const $sumTotal = resumen ? (resumen.querySelector('#sum-total') || resumen.querySelector('div:nth-of-type(4) strong')) : null;
-    function selectCashTier(subtotal){ const tiers=(window.FeesCfg?.cash?.tiers)||[]; for(const t of tiers){ if(t.threshold==null || subtotal < Number(t.threshold)) return t; } return tiers.length?tiers[tiers.length-1]:null; }
-    function grossUp(p,r,f,iva,min){ const denom=1-(1+iva)*r; if(Math.abs(denom)<1e-9) return {total:p,surcharge:0}; let A=(p+(1+iva)*f)/denom; const C1=((A*r)+f)*(1+iva); const Cmin=(min!=null)?(min*(1+iva)):null; if(Cmin!=null && C1<Cmin){ A=p+Cmin; } return { total:A, surcharge:A-p } }
-    function computeSurcharge(subtotal, method){ if(!window.PassThroughFees) return { total:subtotal, surcharge:0 }; if(method==='card'){ const f=window.FeesCfg?.card||{rate:0,fixed:0,iva:0,min_fee:null}; return grossUp(subtotal, Number(f.rate||0), Number(f.fixed||0), Number(f.iva||0), f.min_fee!=null?Number(f.min_fee):null); } if(method==='bank_transfer' || method==='spei'){ const f=window.FeesCfg?.spei||{fixed:0,iva:0}; const s=(1+Number(f.iva||0))*Number(f.fixed||0); return { total:subtotal+s, surcharge:s }; } if(method==='cash'){ const cfg=window.FeesCfg?.cash||{iva:0,tiers:[]}; const t=selectCashTier(subtotal)||{rate:0,fixed:0,min_fee:null}; return grossUp(subtotal, Number(t.rate||0), Number(t.fixed||0), Number(cfg.iva||0), t.min_fee!=null?Number(t.min_fee):null); } return { total:subtotal, surcharge:0 }; }
+    const $sumEnvio = resumen ? (
+      resumen.querySelector('#sum-envio') || 
+      resumen.querySelector('div:nth-of-type(3) strong')) : null;
+    const $sumTotal = resumen ? (
+      resumen.querySelector('#sum-total') || 
+      resumen.querySelector('div:nth-of-type(4) strong')) : null;
+    
+    function selectCashTier(subtotal){ 
+      const tiers=(window.FeesCfg?.cash?.tiers)||[]; 
+      for(const t of tiers){ 
+        if(t.threshold==null || subtotal < Number(t.threshold)) return t; 
+      } 
+      return tiers.length?tiers[tiers.length-1]:null; 
+    }
+
+    function grossUp(p,r,f,iva,min){ 
+      const denom=1-(1+iva)*r; 
+      if(Math.abs(denom)<1e-9) return {total:p, surcharge:0}; 
+      let A=(p+(1+iva)*f)/denom; 
+      const C1=((A*r)+f)*(1+iva); 
+      const Cmin=(min!=null)?(min*(1+iva)):null; 
+      if(Cmin!=null && C1<Cmin){ A=p+Cmin; } 
+      return { total:A, surcharge:A-p }
+    }
+    
+    function computeSurcharge(subtotal, method){ 
+      if(!window.PassThroughFees) return { total:subtotal, surcharge:0 }; 
+      if(method==='card'){ 
+        const f=window.FeesCfg?.card||{rate:0,fixed:0,iva:0,min_fee:null}; 
+        return grossUp(
+          subtotal, 
+          Number(f.rate||0), 
+          Number(f.fixed||0), 
+          Number(f.iva||0), 
+          f.min_fee!=null?Number(f.min_fee):null
+        ); 
+      }
+
+      if(method==='bank_transfer' || method==='spei'){ 
+        const f=window.FeesCfg?.spei||{fixed:0,iva:0}; 
+        const s=(1+Number(f.iva||0))*Number(f.fixed||0); 
+        return { total:subtotal+s, surcharge:s }; 
+      }
+
+      if(method==='cash'){ 
+        const cfg=window.FeesCfg?.cash||{iva:0,tiers:[]}; 
+        const t=selectCashTier(subtotal)||{rate:0,fixed:0,min_fee:null}; 
+        return grossUp(
+          subtotal, 
+          Number(t.rate||0), 
+          Number(t.fixed||0), 
+          Number(cfg.iva||0), 
+          t.min_fee!=null?Number(t.min_fee):null
+        ); 
+      } 
+      return { total:subtotal, surcharge:0 }; 
+    }
+    
     // Intentar poblar desde sesión del backend si existe API de carrito
     async function loadFromSession(){
       try {
@@ -364,7 +403,13 @@
         const resp = await API.carrito.listar();
         const tbody = table.querySelector('tbody');
         if (!tbody) return;
-        if ((resp.items||[]).length) {
+        if (resp.items.length === 0){
+          console.log("carrito no tiene nada");
+          tbody.innerHTML = `
+            <tr>
+              <td>El carrito esta vacio</td>
+            </tr>`;
+        }else if ((resp.items||[]).length) {
           tbody.innerHTML = resp.items.map(it => `
             <tr data-item-id="${it.id}">
               <td>${it.nombre}</td>
@@ -385,8 +430,17 @@
         }
       } catch(e){ console.warn('No se pudo cargar carrito de sesión', e); }
     }
+
     async function recalc(){
-      const items = Array.from(table.querySelectorAll('tbody tr')).map(tr => ({ id: parseInt(tr.getAttribute('data-item-id'),10)||0, cantidad: parseInt(tr.querySelector('.qty')?.value||'0',10)||0 }));
+      const items = Array.from(
+        table.querySelectorAll(
+          'tbody tr')).map(
+            tr => ({ 
+              id: parseInt(tr.getAttribute('data-item-id'),10) ||
+              0, cantidad: parseInt(tr.querySelector('.qty')?.value||'0',10)||0
+            })
+          );
+
       try {
         const resp = await API.carrito.calcular({ items });
         resp.items.forEach(it => {
@@ -406,6 +460,7 @@
         if($sumTotal) $sumTotal.textContent = `$${Number((calc.total||subtotal)+envio).toFixed(2)}`;
       } catch(e){ console.error(e); }
     }
+
     // Inicializar con backend si está disponible
     if (window.API && API.carrito && API.carrito.listar) { loadFromSession(); } else { recalc(); }
     table.addEventListener('input', async (e)=>{
