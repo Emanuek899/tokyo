@@ -1,3 +1,6 @@
+<?php /* Aparentemente este archivo ha sido remplazado por "factura_tu_ticket.php"   */?>
+
+
 <?php $pageTitle = 'Tokyo Sushi - Facturación'; ?>
 <!DOCTYPE html>
 <html lang="es">

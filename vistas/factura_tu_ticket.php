@@ -2,21 +2,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<?php
-  // Basic head partial: meta, title, CSS links
-  $pageTitle = $pageTitle ?? 'Tokyo Sushi';
-?>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#dc281bff">
-<title><?= htmlspecialchars($pageTitle) ?></title>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="assets/css/tokens.css">
-<link rel="stylesheet" href="assets/css/tokens.css">
-<link rel="stylesheet" href="assets/css/base.css">
-<link rel="stylesheet" href="assets/css/utilities.css">
-<!-- Estilos adicionales provistos en raíz para adaptar al sitio -->
-<link rel="stylesheet" href="assets/css/factura.css">
+<?php $pageTitle = 'Tokyo Sushi - Facturación'; ?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <?php include __DIR__.'/partials/head.php'; ?>
+</head>
+<body data-page="facturacion">
+  <?php include __DIR__.'/partials/header.php'; ?>
   <style>
     .grid-2 { display:grid; grid-template-columns: 1.2fr 0.8fr; gap:1rem; }
     .muted { color: var(--color-muted); }
@@ -235,7 +228,17 @@ buscarForm.addEventListener('submit', async (e) => {
   </script>
   </head>
 <body>
-  <?php include __DIR__.'/partials/header.php'; ?>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#dc281bff">
+<title><?= htmlspecialchars($pageTitle) ?></title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/utilities.css">
+<!-- Estilos adicionales provistos en raíz para adaptar al sitio -->
+<link rel="stylesheet" href="assets/css/factura.css">
   <main class="section">
     <div class="container ">
       <div stu class="card">

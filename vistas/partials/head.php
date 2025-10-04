@@ -14,4 +14,5 @@
 <link rel="stylesheet" href="assets/css/utilities.css">
 <!-- Estilos adicionales provistos en raíz para adaptar al sitio -->
 <link rel="stylesheet" href="assets/css/style1.css">
+<link rel="stylesheet" href="/assets/css/facturas.css">
 
