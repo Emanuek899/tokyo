@@ -4,6 +4,7 @@ require_once dirname(__DIR__, 2) . '/utils/response.php';
 require_once dirname(__DIR__, 2) . '/utils/cart_session.php';
 require_once dirname(__DIR__, 2) . '/config/db.php';
 require_once dirname(__DIR__, 2) . '/utils/corte.php';
+require_once dirname(__DIR__, 2) . '/utils/validator.php';
 
 try {
     if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
@@ -12,8 +13,18 @@ try {
     $input = json_decode(file_get_contents('php://input'), true) ?: [];
     $producto_id = (int)($input['producto_id'] ?? 0);
     $cantidad = (int)($input['cantidad'] ?? -1);
-    if ($producto_id <= 0 || $cantidad < 0) {
-        json_error('Datos inválidos', 422);
+    $data = [
+        'producto_id' => $producto_id,
+        'cantidad' => $cantidad
+    ];
+    $rules = [
+        'producto_id' => 'Id',
+        'cantidad' => 'Cantidad'
+    ];
+    $validator = Validator::validate($data, $rules);
+    if(!empty($validatedData)){
+        json_error(['success'=>false, 'error'=> $validator], 422); 
+        exit;
     }
     $cart = cart_get_all();
     $cur = isset($cart[$producto_id]) ? (int)$cart[$producto_id] : 0;
@@ -21,6 +32,7 @@ try {
     if ($isIncrease) {
         $pdo = DB::get();
         $c = corte_abierto($pdo);
+        $validator = Validator::validate(['corte' => $c['abierto']], ['corte' => 'Corte|Required']);
         if (empty($c['abierto'])) {
             $data = [
                 'success'=>false,

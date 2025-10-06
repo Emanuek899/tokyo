@@ -1,16 +1,33 @@
 <?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 require_once __DIR__ . '/../../config/db.php';
-require_once __DIR__ . '/../../utils/response.php';
+require_once __DIR__ . '/../../../utils/response.php';
+require_once __DIR__ . '/../../../utils/validator.php';
+
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         json_error('Método no permitido', 405);
     }
-    $input = json_decode(file_get_contents('php://input'), true);
-    if (!is_array($input) || !isset($input['items']) || !is_array($input['items'])) {
+    $input = json_decode(file_get_contents('php://input'), true) ?? null;
+    /* if (!is_array($input) || !isset($input['items']) || !is_array($input['items'])) {
         json_error('Entrada inválida', 422);
+    } */ 
+    $items = $input['items'] ?? null;
+    $dataVal = [
+        'input' => $input,
+        'items' => $items
+    ];
+    $dataRules = [
+        'input' => 'Required|Array',
+        'items' => 'Required|Array'
+    ];
+    $validator = Validator::validate($dataVal, $dataRules);
+    if(!empty($validator)){
+        json_error(['success' => false, 'error' => $validator], 422);
+        exit;
     }
-    $items = $input['items'];
     $ids = array_values(
         array_unique(
             array_filter(

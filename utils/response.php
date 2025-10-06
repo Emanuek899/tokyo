@@ -6,7 +6,7 @@ function json_response($data, int $code = 200): void {
     exit;
 }
 
-function json_error(string $message, int $code = 400, $extra = null): void {
+function json_error(array $message, int $code = 400, $extra = null): void {
     $payload = ['error' => $message];
     if ($extra !== null) $payload['details'] = $extra;
     json_response($payload, $code);
