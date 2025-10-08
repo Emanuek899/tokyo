@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 $BASE = dirname(__DIR__, 2);
+require_once $BASE . '/backend/components/MenuRepo.php';
 // Ajusta estas rutas al layout real del proyecto
 if (is_file($BASE . '/backend/config/db.php')) {
   require_once $BASE . '/backend/config/db.php';
@@ -112,9 +113,13 @@ try {
 
   // SELECT (alias precio_final para el front)
   $selectPrecio = $colPrecioSede ? 'COALESCE(sp.precio, p.precio) AS precio_final' : 'p.precio AS precio_final';
-
+  $params[':selectPrecio'] = $selectPrecio;
+  $params[':offset'] = $offset;
+  $params[':limit'] = $perPage;
+  $params[':selectPrecio'] = $selectPrecio;
+  $params[':orderSql'] = $orderSql;
   // Conteo
-  $sqlCount = "SELECT COUNT(*) FROM productos p{$joinSql}{$whereSql}";
+  /* $sqlCount = "SELECT COUNT(*) FROM productos p{$joinSql}{$whereSql}";
   $st = $pdo->prepare($sqlCount);
   // Bind SOLO de claves usadas en $sqlCount
   foreach ($params as $k => $v) {
@@ -126,9 +131,9 @@ try {
   $total = (int)$st->fetchColumn();
 
   // Items
-  $sql = "SELECT p.id, p.nombre, p.descripcion, p.imagen, $selectPrecio,  c.id AS categoria_id, c.nombre AS categoria_nombre
+  $sql = "SELECT p.id, p.nombre, p.descripcion, p.imagen, :selectPrecio,  c.id AS categoria_id, c.nombre AS categoria_nombre
           FROM productos p{$joinSql}{$whereSql}
-          ORDER BY $orderSql
+          ORDER BY :orderSql
           LIMIT :limit OFFSET :offset";
 
   $st = $pdo->prepare($sql);
@@ -142,8 +147,13 @@ try {
   $st->bindValue(':limit',  $perPage, PDO::PARAM_INT);
   $st->bindValue(':offset', $offset,  PDO::PARAM_INT);
 
-  $st->execute();
-  $items = $st->fetchAll(PDO::FETCH_ASSOC);
+  $st->execute(); */
+  $pdo = DB::get();
+  $repo = new MenuRepo($pdo);
+  $total = $repo->contar($params, $joins, $wheres);
+  $items = $repo->listar($params, $joins, $wheres);
+  
+
 
   echo json_encode([
     'success'   => true,
