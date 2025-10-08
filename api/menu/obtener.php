@@ -10,6 +10,7 @@ if (is_file($BASE . '/backend/config/db.php')) {
   require_once $BASE . '/config/db.php';
   require_once $BASE . '/utils/response.php';
 }
+require_once $BASE . '/backend/components/MenuRepo.php';
 
 function table_exists(PDO $pdo, string $table): bool {
   $q = $pdo->prepare("SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?");
@@ -24,10 +25,6 @@ function column_exists(PDO $pdo, string $table, string $column): bool {
 
 try {
   header('Content-Type: application/json; charset=utf-8');
-
-  $pdo = DB::get();
-  $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
   $id     = (int)($_GET['id'] ?? 0);
   $sedeId = (int)($_GET['sede_id'] ?? 0);
 
@@ -36,6 +33,7 @@ try {
     echo json_encode(['success' => false, 'error' => 'Parámetro id requerido']);
     return;
   }
+  $pdo = DB::get();
 
   // Precio base (expresión) con posible override por sede
   $haySedeProductos = ($sedeId > 0 && table_exists($pdo, 'sede_productos'));
@@ -45,24 +43,20 @@ try {
 
   $join = 'LEFT JOIN catalogo_categorias c ON c.id = p.categoria_id';
   $params = [':id' => $id];
+  $params = [':selectPrecio' => $selectPrecio];
   if ($haySedeProductos) {
     $join .= ' LEFT JOIN sede_productos sp ON sp.producto_id = p.id AND sp.sede_id = :sede';
     $params[':sede'] = $sedeId;
+    $params[':joins'] = $join;
   }
+  $params[':joins'] = $join;
 
-  $sql = "SELECT p.id, p.nombre, p.descripcion, p.imagen, p.precio, p.existencia, p.activo,
-                 $selectPrecio,
-                 c.id AS categoria_id, c.nombre AS categoria_nombre
-          FROM productos p
-          $join
-          WHERE p.id = :id
-          LIMIT 1";
+  $exist = isset($row['existencia']) ? (int)$row['existencia'] : 0;
+  $activo = isset($row['activo']) ? (int)$row['activo'] : 1;
+  $estado = ($activo === 0 || $exist <= 0) ? 'agotado' : 'disponible';
 
-  $st = $pdo->prepare($sql);
-  foreach ($params as $k => $v) $st->bindValue($k, $v);
-  $st->execute();
-  $row = $st->fetch(PDO::FETCH_ASSOC);
-
+  $repo = new MenuRepo($pdo);
+  $row = $repo->obtener($params, $exits, $activo, $estado);
   if (!$row) {
     http_response_code(404);
     echo json_encode(['success' => false, 'error' => 'Producto no encontrado']);
@@ -70,9 +64,6 @@ try {
   }
 
   // Estado derivado simple
-  $exist = isset($row['existencia']) ? (int)$row['existencia'] : 0;
-  $activo = isset($row['activo']) ? (int)$row['activo'] : 1;
-  $estado = ($activo === 0 || $exist <= 0) ? 'agotado' : 'disponible';
 
   $item = [
     'id' => (int)$row['id'],
