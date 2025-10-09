@@ -15,6 +15,35 @@
     .muted { color: var(--color-muted); }
     .field { display:flex; flex-direction:column; gap:.35rem; }
     .field label { font-size:.9rem; color:var(--color-text); }
+    
+    /* Estilos responsivos */
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .container { padding: 1rem; }
+      .card__body { padding: 1rem; }
+    }
+
+    /* Hacer la tabla responsive */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Ajustes para formularios en móvil */
+    @media (max-width: 640px) {
+      form[id="form-buscar"] {
+        grid-template-columns: 1fr !important;
+      }
+      
+      fieldset .grid {
+        grid-template-columns: 1fr !important;
+      }
+      
+      .field {
+        grid-column: span 1 !important;
+      }
+    }
   </style>
   <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -100,16 +129,18 @@
     function renderPreview(t){
       const rows = (t.partidas||[]).map(p=>`<tr><td>${p.descripcion||''}</td><td style="text-align:right">${p.cantidad}</td><td style="text-align:right">$${Number(p.precio_unitario).toFixed(2)}</td><td style="text-align:right">$${Number(p.importe).toFixed(2)}</td></tr>`).join('');
       prev.innerHTML = `
-        <div  class="muted">Ticket #${t.folio||t.id} • ${t.fecha?.slice(0,10)||''}</div>
-        <table class="table" style=" color:black; width:100%; font-size:.95rem; border-collapse:collapse;">
-          <thead><tr><th style="text-align:left">Concepto</th><th>Cant.</th><th>Precio</th><th>Importe</th></tr></thead>
-          <tbody>${rows}</tbody>
-          <tfoot>
-            <tr><td colspan="3" style="text-align:right">Base</td><td style="text-align:right">$${Number(t.base||0).toFixed(2)}</td></tr>
-            <tr><td colspan="3" style="text-align:right">IVA</td><td style="text-align:right">$${Number(t.iva||0).toFixed(2)}</td></tr>
-            <tr><td colspan="3" style="text-align:right"><strong>Total</strong></td><td style="text-align:right"><strong>$${Number(t.total||0).toFixed(2)}</strong></td></tr>
-          </tfoot>
-        </table>`;
+        <div class="muted">Ticket #${t.folio||t.id} • ${t.fecha?.slice(0,10)||''}</div>
+        <div class="table-responsive">
+          <table class="table" style="color:black; width:100%; font-size:.95rem; border-collapse:collapse; min-width:500px;">
+            <thead><tr><th style="text-align:left">Concepto</th><th style="min-width:70px;">Cant.</th><th style="min-width:80px;">Precio</th><th style="min-width:90px;">Importe</th></tr></thead>
+            <tbody>${rows}</tbody>
+            <tfoot>
+              <tr><td colspan="3" style="text-align:right">Base</td><td style="text-align:right">$${Number(t.base||0).toFixed(2)}</td></tr>
+              <tr><td colspan="3" style="text-align:right">IVA</td><td style="text-align:right">$${Number(t.iva||0).toFixed(2)}</td></tr>
+              <tr><td colspan="3" style="text-align:right"><strong>Total</strong></td><td style="text-align:right"><strong>$${Number(t.total||0).toFixed(2)}</strong></td></tr>
+            </tfoot>
+          </table>
+        </div>`;
       $('#payment_method').value = (t.sugerencias?.metodo_pago)||'PUE';
       $('#payment_form').value = (t.sugerencias?.forma_pago)||'03';
     }
