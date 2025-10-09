@@ -108,7 +108,6 @@ try {
     default:            $orderSql = 'p.nombre ASC';
   }
 
-  $selectPrecio = $colPrecioSede ? 'COALESCE(sp.precio, p.precio) AS precio_final' : 'p.precio AS precio_final';
   $params[':selectPrecio'] = $selectPrecio;
   $params[':offset'] = $offset;
   $params[':limit'] = $perPage;
@@ -118,7 +117,7 @@ try {
   $pdo = DB::get();
   $repo = new MenuRepo($pdo);
   $total = $repo->contar($params, $joins, $wheres);
-  $items = $repo->listar($params, $joins, $wheres);
+  $items = $repo->listar($params, $joins, $wheres, $colPrecioSede);
   
   echo json_encode([
     'success'   => true,

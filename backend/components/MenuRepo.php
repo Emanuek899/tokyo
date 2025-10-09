@@ -10,10 +10,12 @@ class MenuRepo{
      * Lista todos los productos, con capacidad de filtrar por busqueda
      * categoria, sede y precio  
      */ 
-    public function listar(array $parameters, array $joinList, array $whereList){
+    public function listar(array $parameters, array $joinList, array $whereList, $colPrecioSede){
         $whereSql = $whereList ? ('WHERE '.implode(' AND ', $whereList)) : '';
         $joinSql  = $joinList ? (' '.implode(' ', $joinList).' ') : ' ';
-        $sql = "SELECT p.id, p.nombre, p.descripcion, p.imagen, :selectPrecio,  c.id AS categoria_id, c.nombre AS categoria_nombre
+        $selectPrecio = $colPrecioSede ? 'COALESCE(sp.precio, p.precio) AS precio_final' : 'p.precio AS precio_final';
+
+        $sql = "SELECT p.id, p.nombre, p.descripcion, p.imagen, $selectPrecio,  c.id AS categoria_id, c.nombre AS categoria_nombre
         FROM productos p{$joinSql}{$whereSql}
         ORDER BY :orderSql
         LIMIT :limit OFFSET :offset";
