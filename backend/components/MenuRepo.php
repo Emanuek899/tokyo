@@ -57,30 +57,73 @@ class MenuRepo{
     /**
      * Obtiene solo un producto con detalles
      */
-    public function obtener(array $params, $exist, $activo, $estado){
+    public function obtener(array $params, $exist, $activo, $estado, $joins, $selectPrecio){
         $sql = "SELECT p.id, p.nombre, p.descripcion, p.imagen, p.precio, p.existencia, p.activo,
-                :selectPrecio,
+                {$selectPrecio},
                 c.id AS categoria_id, c.nombre AS categoria_nombre
                 FROM productos p
-                :joins
+                {$joins}
                 WHERE p.id = :id
                 LIMIT 1";
         $st = $this->pdo->prepare($sql);
         $st->execute($params);
-        $st->fetchAll();
+        $row = $st->fetch(PDO::FETCH_ASSOC);
+        $exist = isset($row['existencia']) ? (int)$row['existencia'] : 0;
+        $activo = isset($row['activo']) ? (int)$row['activo'] : 1;
+        $estado = ($activo === 0 || $exist <= 0) ? 'agotado' : 'disponible';
+        if($row){
+            $item = [
+                'id' => (int)$row['id'],
+                'nombre' => (string)($row['nombre'] ?? ''),
+                'descripcion' => (string)($row['descripcion'] ?? ''),
+                'imagen' => $row['imagen'] ?? null,
+                'precio' => isset($row['precio']) ? (float)$row['precio'] : null,
+                'precio_final' => isset($row['precio_final']) ? (float)$row['precio_final'] : null,
+                'categoria_id' => isset($row['categoria_id']) ? (int)$row['categoria_id'] : null,
+                'categoria_nombre' => $row['categoria_nombre'] ?? null,
+                'existencia' => $exist,
+                'activo' => $activo,
+                'estado' => $estado,
+            ];
+        }
         $item = [
-            'id' => (int)$st['id'],
-            'nombre' => (string)($st['nombre'] ?? ''),
-            'descripcion' => (string)($st['descripcion'] ?? ''),
-            'imagen' => $st['imagen'] ?? null,
-            'precio' => isset($st['precio']) ? (float)$st['precio'] : null,
-            'precio_final' => isset($st['precio_final']) ? (float)$st['precio_final'] : null,
-            'categoria_id' => isset($st['categoria_id']) ? (int)$st['categoria_id'] : null,
-            'categoria_nombre' => $st['categoria_nombre'] ?? null,
-            'existencia' => $exist,
-            'activo' => $activo,
-            'estado' => $estado,
+            'message' => 'No se encontro el producto',
         ];
         return $item;
     }
+    
+    public function topVendidosId(array $parameters){
+        $sql = "SELECT vd.producto_id AS id,
+                p.nombre,
+                p.precio,
+                p.imagen,
+                p.categoria_id,
+                c.nombre AS categoria,
+                SUM(vd.cantidad) AS total_vendidos
+        FROM venta_detalles vd
+        JOIN productos p ON p.id = vd.producto_id
+        LEFT JOIN catalogo_categorias c ON c.id = p.categoria_id
+        JOIN tickets t ON t.venta_id = vd.venta_id
+        WHERE t.sede_id = :sede
+        GROUP BY vd.producto_id, p.nombre, p.precio, p.imagen, p.categoria_id, c.nombre
+        ORDER BY total_vendidos DESC
+        LIMIT 20";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($parameters);
+        return $stmt->fetchAll();
+    }
+
+    public function topVendidos(){
+        $sql = "SELECT v.producto_id AS id, p.nombre, p.precio, p.imagen, p.categoria_id, c.nombre AS categoria,
+                v.total_vendidos
+        FROM vista_productos_mas_vendidos v
+        JOIN productos p ON p.id = v.producto_id
+        LEFT JOIN catalogo_categorias c ON c.id = p.categoria_id
+        ORDER BY v.total_vendidos DESC
+        LIMIT 20";
+        $rows = $this->pdo->prepare($sql);
+        $rows->execute();
+        return $rows->fetchAll();
+    }
+    
 }
