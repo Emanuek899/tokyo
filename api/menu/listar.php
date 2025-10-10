@@ -111,7 +111,6 @@ try {
   $params[':selectPrecio'] = $selectPrecio;
   $params[':offset'] = $offset;
   $params[':limit'] = $perPage;
-  $params[':selectPrecio'] = $selectPrecio;
   $params[':orderSql'] = $orderSql;
 
   $pdo = DB::get();

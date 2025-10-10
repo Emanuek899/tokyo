@@ -1,5 +1,7 @@
 <?php
 declare(strict_types=1);
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 require_once dirname(__DIR__, 2) . '/config/db.php';
 require_once dirname(__DIR__, 2) . '/utils/response.php';
 require_once dirname(__DIR__, 2) . '/utils/cart_session.php';
@@ -8,7 +10,7 @@ require_once dirname(__DIR__, 2) . '/utils/corte.php';
 
 try {
     if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-        json_error('Método no permitido', 405);
+        json_error(['Método no permitido'], 405);
     }
     $pdo = DB::get();
     $cart = cart_get_all();
@@ -62,7 +64,7 @@ try {
         $total += $precio * $qty;
         $detalles[] = ['producto_id'=>$pid, 'cantidad'=>$qty, 'precio_unitario'=>$precio];
     }
-    if (!$detalles) json_error('Carrito inválido', 422);
+    if (!$detalles) json_error(['Carrito inválido'], 422);
 
     // Surcharge pass-through (use metadata if available; fallback compute)
     $feesCfg = ConektaCfg::feesCfg();
@@ -122,9 +124,18 @@ try {
         $corteInfo = corte_abierto($pdo);
         $corte_id = isset($corteInfo['corte_id']) ? (int)$corteInfo['corte_id'] : null;
     }
-
+    
     if (!$ref) $pdo->beginTransaction();
-    $sqlVenta = 'INSERT INTO ventas (fecha, mesa_id, repartidor_id, tipo_entrega, usuario_id, total, estatus, entregado, estado_entrega, sede_id, observacion, corte_id) VALUES (NOW(), :mesa, :repartidor, :tipo, :usuario, :total, "activa", 0, "pendiente", :sede, :obs, :corte)';
+    $sqlVenta = 'INSERT INTO ventas (
+        fecha, mesa_id, repartidor_id, 
+        tipo_entrega, usuario_id, total, 
+        estatus, entregado, estado_entrega, 
+        sede_id, observacion, corte_id, propina_efectivo, 
+        propina_cheque, propina_tarjeta) 
+        VALUES (NOW(), :mesa, :repartidor, :tipo, 
+        :usuario, :total, "activa", 0, "pendiente", :sede, :obs, :corte, 0, 0, 0)
+        ';
+        
     $iv = $pdo->prepare($sqlVenta);
     $iv->execute([
         ':mesa' => $mesa_id,
@@ -159,5 +170,5 @@ try {
     json_response(['success' => true, 'ok' => true, 'venta_id' => $venta_id]);
 } catch (Throwable $e) {
     if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
-    json_error('Error al confirmar pedido', 500, $e->getMessage());
+    json_error(['Error al confirmar pedido'], 500, throw $e);
 }
