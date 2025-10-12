@@ -8,6 +8,11 @@ function issue_csrf_token(): string {
     return $_SESSION['csrf_token'];
 }
 
+function csrf_meta_tag(): string {
+    $token = issue_csrf_token();
+    return '<meta name="csrf-token" content="' . htmlspecialchars($token) . '">';
+}
+
 function require_csrf_token(): void {
     $sent = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($_POST['csrf_token'] ?? '');
     $valid = $_SESSION['csrf_token'] ?? '';

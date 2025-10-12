@@ -88,6 +88,7 @@ try {
         'partidas'=>$partidas
     ]]);
 } catch (Throwable $e) {
-    json_error('Error buscando ticket', 500, $e->getMessage());
+    error_log("Error en buscar-ticket.php: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+    json_error(['message' => 'Error buscando ticket: ' . $e->getMessage()], 500);
 }
 
