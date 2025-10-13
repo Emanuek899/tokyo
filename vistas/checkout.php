@@ -28,19 +28,26 @@
             <fieldset class="mt-3">
               <legend><strong>Paso 3:</strong> Pago</legend>
               <div class="field"><label>Método</label>
-                <select class="select"><option>Tarjeta</option><option>Efectivo</option><option>Contraentrega</option></select>
+                <select class="select" id="inp-metodo">
+                  <option>Tarjeta</option>
+                  <option>Efectivo</option>
+                  <option>Contraentrega</option>
+                </select>
               </div>
             </fieldset>
-            <button class="btn custom-btn mt-4" disabled title="Demo">Confirmar pedido</button>
+            <button class="btn custom-btn mt-4" disabled title="Demo" id="btn-pagar">Confirmar pedido</button>
+            <div id="alert" class="mt-2" style="display:none; background:#fdecea;color:#611a15;padding:.5rem .75rem;border-radius:6px"></div>
+            <p class="mt-2 muted" id="msg"></p>
           </div>
         </form>
         <aside>
           <div class="card">
             <div class="card__body">
               <h2>Resumen</h2>
-              <div class="flex justify-between mt-2"><span>Subtotal</span><strong>$277.00</strong></div>
-              <div class="flex justify-between mt-2"><span>Envío</span><strong>$30.00</strong></div>
-              <div class="flex justify-between mt-2"><span>Total</span><strong>$307.00</strong></div>
+                <div class="flex justify-between mt-2"><span>Subtotal</span><strong id="sum-subtotal">$0.00</strong></div>
+                <div class="flex justify-between mt-2"><span>Cargo por plataforma</span><strong id="sum-fee">$0.00</strong></div>
+                <div class="flex justify-between mt-2"><span>Envío</span><strong id="sum-envio">$0.00</strong></div>
+                <div class="flex justify-between mt-2"><span>Total</span><strong id="sum-total">$0.00</strong></div>
             </div>
           </div>
         </aside>
