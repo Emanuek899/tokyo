@@ -7,6 +7,9 @@ require_once dirname(__DIR__, 2) . '/utils/response.php';
 require_once dirname(__DIR__, 2) . '/utils/cart_session.php';
 require_once dirname(__DIR__, 2) . '/config/conekta.php';
 require_once dirname(__DIR__, 2) . '/utils/corte.php';
+require_once dirname(__DIR__, 2) . '/utils/validator.php';
+require_once dirname(__DIR__, 2) . '/components/CheckoutRepo.php';
+
 
 try {
     if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
@@ -14,8 +17,10 @@ try {
     }
     $pdo = DB::get();
     $cart = cart_get_all();
-    if (empty($cart)) {
-        json_error('Carrito vacío', 422);
+    $validCart = Validator::validate(['cart' => $cart], ['cart' => 'Empty']);
+    if (empty($ValidCart)) {
+        json_error($validatedCart, 422);
+        exit;
     }
     $input = json_decode(file_get_contents('php://input'), true) ?: [];
     $tipo = $input['tipo'] ?? 'rapido'; // rapido | mesa | domicilio
@@ -101,7 +106,7 @@ try {
     $chkSede = $pdo->prepare('SELECT 1 FROM sedes WHERE id = ? LIMIT 1');
     $chkSede->execute([$sede_id]);
     if (!$chkSede->fetchColumn()) {
-        json_error('Sede inválida', 400, 'sede_id='.$sede_id.' no existe en sedes');
+        json_error(['Sede inválida'], 400, 'sede_id='.$sede_id.' no existe en sedes');
     }
 
     // Idempotencia con referencia de pago
