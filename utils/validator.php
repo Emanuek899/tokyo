@@ -38,12 +38,39 @@ class Validator{
         return self::$errors;
     }
 
-    private static function validateRequired($parameter, $value){
-        if(!isset($value)){
-            self::$errors[$parameter][] = "El $parameter es obligatorio";
+    /**
+     * Valida si un elemento fue encontrado en la base de datos
+     */
+    private function validateExistence($parameter, $value){
+        if(empty($value)){
+            self::$errors[$parameter][] = "$parameter no encontrado en DB";
+            return;
+        }        
+    }
+
+    /**
+     * Valida si el parametro esta vacio
+     */
+    private static function validateEmpty($parameter, $value){
+        if(empty($value)){
+            self::$errors[$parameter][] = "El $parameter esta vacio";
+            return;
         }
     }
 
+    /** 
+     * Valida si el parametro es null 
+     */
+    private static function validateRequired($parameter, $value){
+        if(!isset($value)){
+            self::$errors[$parameter][] = "El $parameter es null";
+            return;
+        }
+    }
+
+    /**
+     * Valida si el elemento es un array
+     */
     private static function validateArray($parameter, $array){
         if(!is_array($array)){
             self::$errors[$parameter][] = "El $parameter no es un array";
