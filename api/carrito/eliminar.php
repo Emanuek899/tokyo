@@ -7,7 +7,7 @@ require_once dirname(__DIR__, 2) . '/utils/validator.php';
 
 try {
     if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-        json_error('Método no permitido', 405);
+        json_error(['Método no permitido'], 405);
     }
     $input = json_decode(file_get_contents('php://input'), true) ?: [];
     $producto_id = (int)($input['producto_id'] ?? 0);

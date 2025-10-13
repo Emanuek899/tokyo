@@ -1,3 +1,70 @@
 <?php
-require_once dirname(__DIR__, 2) . '/backend/api/carrito/calcular.php';
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+require_once __DIR__ . '/../../config/db.php';
+require_once __DIR__ . '/../../utils/response.php';
+require_once __DIR__ . '/../../utils/validator.php';
+require_once __DIR__ . '/../../components/CarritoRepo.php';
+
+
+try {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        json_error(['Método no permitido'], 405);
+    }
+    $input = json_decode(file_get_contents('php://input'), true) ?? null;
+    $items = $input['items'] ?? null;
+    $dataVal = [
+        'input' => $input,
+        'items' => $items
+    ];
+    $dataRules = [
+        'input' => 'Required|Array',
+        'items' => 'Required|Array'
+    ];
+    $validator = Validator::validate($dataVal, $dataRules);
+    if(!empty($validator)){
+        json_error(['success' => false, 'error' => $validator], 422);
+        exit;
+    }
+    $ids = array_values(
+        array_unique(
+            array_filter(
+                array_map(
+                    fn($i)=> (int)($i['id'] ?? 0), $items
+                ),
+                fn($v)=>$v>0
+            )
+        )
+    );
+    if (!$ids) json_response(['items'=>[], 'subtotal'=>0, 'envio'=>0, 'total'=>0]);
+
+    $pdo = DB::get();
+    $repo = new CarritoRepo($pdo);
+    $in = implode(',', array_fill(0, count($ids), '?'));
+    $prices = $repo->obtenerPrecio($ids, $in);
+ 
+    $outItems = [];
+    $subtotal = 0.0;
+    foreach ($items as $it) {
+        $pid = (int)($it['id'] ?? 0);
+        $qty = max(0, (int)($it['cantidad'] ?? 0));
+        if ($pid && $qty && isset($prices[$pid])) {
+            $precio = $prices[$pid]['precio'];
+            $line = $precio * $qty; // cálculo en API
+            $subtotal += $line;
+            $outItems[] = [
+                'id' => $pid,
+                'nombre' => $prices[$pid]['nombre'],
+                'precio' => $precio,
+                'cantidad' => $qty,
+                'subtotal' => $line
+            ];
+        }
+    }
+    $envio = isset($input['envio']) ? (float)$input['envio'] : 30.0;
+    $total = $subtotal + $envio;
+    json_response(['items'=>$outItems, 'subtotal'=>$subtotal, 'envio'=>$envio, 'total'=>$total]);
+} catch (Throwable $e) {
+    json_error(['Error al calcular carrito'], 500, $e->getMessage());
+}
 

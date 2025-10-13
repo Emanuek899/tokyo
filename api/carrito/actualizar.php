@@ -13,19 +13,21 @@ try {
     $input = json_decode(file_get_contents('php://input'), true) ?: [];
     $producto_id = (int)($input['producto_id'] ?? 0);
     $cantidad = (int)($input['cantidad'] ?? -1);
-    $data = [
+
+    $valData = [
         'producto_id' => $producto_id,
         'cantidad' => $cantidad
     ];
-    $rules = [
+    $valRules = [
         'producto_id' => 'Id',
         'cantidad' => 'Cantidad'
     ];
-    $validator = Validator::validate($data, $rules);
+    $validator = Validator::validate($valData, $valRules);
     if(!empty($validatedData)){
         json_error(['success'=>false, 'error'=> $validator], 422); 
         exit;
     }
+
     $cart = cart_get_all();
     $cur = isset($cart[$producto_id]) ? (int)$cart[$producto_id] : 0;
     $isIncrease = ($cantidad > $cur);

@@ -12,15 +12,18 @@ try {
     }
     $pdo = DB::get();
     $c = corte_abierto($pdo);
+    
     // Validación: requiere corte de caja abierto
     $validator = Validator::validate(["corte" => $c['abierto']], ['corte' => 'Corte']);
     if (!empty($validator)) {
         json_error(['success'=>false, 'error'=> $validator], 409);
         exit;
     }    
+
     $input = json_decode(file_get_contents('php://input'), true) ?: [];
     $producto_id = (int)($input['producto_id'] ?? 0);
     $cantidad = (int)($input['cantidad'] ?? 0);
+
     $dataVal = [
         'producto_id' => $producto_id,
         'cantidad' => $cantidad
@@ -34,6 +37,7 @@ try {
         json_error(['success'=>false, 'error'=> $validator], 422);
         exit;
     }
+
     cart_add($producto_id, $cantidad);
     json_response(['success'=>true,'ok' => true, 'carrito' => cart_get_all()]);
 } catch (Throwable $e) {

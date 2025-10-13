@@ -3,10 +3,11 @@ declare(strict_types=1);
 require_once dirname(__DIR__, 2) . '/config/db.php';
 require_once dirname(__DIR__, 2) . '/utils/response.php';
 require_once dirname(__DIR__, 2) . '/utils/cart_session.php';
+require_once dirname(__DIR__, 2) . '/components/CarritoRepo.php';
 
 try {
     if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'GET') {
-        json_error('Método no permitido', 405);
+        json_error(['Método no permitido'], 405);
     }
     $cart = cart_get_all();
     if (empty($cart)) {
@@ -16,16 +17,14 @@ try {
     $pdo = DB::get();
     $ids = array_keys($cart);
     $in  = implode(',', array_fill(0, count($ids), '?'));
-    $st  = $pdo->prepare("SELECT id, nombre, precio FROM productos WHERE id IN ($in)");
-    foreach ($ids as $i => $id) $st->bindValue($i+1, (int)$id, PDO::PARAM_INT);
-    $st->execute();
-    $map = [];
-    while ($r = $st->fetch()) $map[(int)$r['id']] = ['nombre'=>$r['nombre'], 'precio'=>(float)$r['precio']];
+    $repo = new CarritoRepo($pdo);
+    $map = $repo->obtenerPrecio($ids, $in);
 
     $items = [];
     $subtotal = 0.0;
     foreach ($cart as $pid => $qty) {
-        $pid = (int)$pid; $qty = max(0, (int)$qty);
+        $pid = (int)$pid; 
+        $qty = max(0, (int)$qty);
         if ($qty > 0 && isset($map[$pid])) {
             $precio = $map[$pid]['precio'];
             $line = $precio * $qty;
@@ -43,5 +42,5 @@ try {
     $total = $subtotal + $envio;
     json_response(['items' => $items, 'subtotal' => $subtotal, 'envio' => $envio, 'total' => $total]);
 } catch (Throwable $e) {
-    json_error('Error al listar carrito', 500, $e->getMessage());
+    json_error(['Error al listar carrito'], 500, $e->getMessage());
 }
