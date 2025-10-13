@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 $BASE = dirname(__DIR__, 2);
-require_once $BASE . '/backend/components/MenuRepo.php';
+require_once __DIR__ . '/../../components/MenuRepo.php';
 // Ajusta estas rutas al layout real del proyecto
 if (is_file($BASE . '/backend/config/db.php')) {
   require_once $BASE . '/backend/config/db.php';
@@ -33,7 +33,7 @@ try {
   $search      = trim((string)($_GET['search'] ?? ''));
   $ordenarIn   = trim((string)($_GET['ordenar'] ?? 'nombre')); // nombre|relevancia|precio_asc|precio_desc|novedad|id_asc|id_desc
   $categoriaId = (int)($_GET['categoria_id'] ?? 0);
-  $sedeId      = (int)($_GET['sede_id'] ?? 0);
+  $sedeId      = (int)($_GET['sede_id'] ?? 1);
   $precioMin   = isset($_GET['precio_min']) ? (float)$_GET['precio_min'] : null;
   $precioMax   = isset($_GET['precio_max']) ? (float)$_GET['precio_max'] : null;
 
@@ -56,7 +56,7 @@ try {
   $haySedeProductos = ($sedeId > 0 && table_exists($pdo, 'sede_productos'));
   $colPrecioSede    = ($haySedeProductos && column_exists($pdo, 'sede_productos', 'precio'));
   $precioExpr       = $colPrecioSede ? 'COALESCE(sp.precio, p.precio)' : 'p.precio';
-
+  $selectPrecio = $colPrecioSede ? 'COALESCE(sp.precio, p.precio) AS precio_final' : 'p.precio AS precio_final';
   if ($haySedeProductos) {
     $joins[] = 'LEFT JOIN sede_productos sp ON sp.producto_id = p.id AND sp.sede_id = :sede';
     $params[':sede'] = $sedeId;
@@ -107,8 +107,6 @@ try {
     case 'nombre':
     default:            $orderSql = 'p.nombre ASC';
   }
-
-  $params[':selectPrecio'] = $selectPrecio;
   $params[':offset'] = $offset;
   $params[':limit'] = $perPage;
   $params[':orderSql'] = $orderSql;
@@ -116,7 +114,7 @@ try {
   $pdo = DB::get();
   $repo = new MenuRepo($pdo);
   $total = $repo->contar($params, $joins, $wheres);
-  $items = $repo->listar($params, $joins, $wheres, $colPrecioSede);
+  $items = $repo->listar($params, $joins, $wheres, $selectPrecio);
   
   echo json_encode([
     'success'   => true,

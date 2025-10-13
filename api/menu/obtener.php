@@ -11,9 +11,9 @@ if (is_file($BASE . '/backend/config/db.php')) {
 } else {
   require_once $BASE . '/config/db.php';
 }
-require_once $BASE . '/backend/components/MenuRepo.php';
-require_once $BASE . '/utils/validator.php';
-require_once $BASE . '/utils/response.php';
+require_once __DIR__ . '/backend/components/MenuRepo.php';
+require_once __DIR__ . '/utils/validator.php';
+require_once __DIR__ . '/utils/response.php';
 
 
 function table_exists(PDO $pdo, string $table): bool {
