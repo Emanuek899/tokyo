@@ -1,7 +1,5 @@
 <?php
 declare(strict_types=1);
-ini_set('display_errors', '1');
-error_reporting(E_ALL);
 
 $BASE = dirname(__DIR__, 2);
 if (is_file($BASE . '/backend/config/db.php')) {
@@ -9,9 +7,9 @@ if (is_file($BASE . '/backend/config/db.php')) {
 } else {
   require_once $BASE . '/config/db.php';
 }
-require_once __DIR__ . '/backend/components/MenuRepo.php';
-require_once __DIR__ . '/utils/validator.php';
-require_once __DIR__ . '/utils/response.php';
+require_once __DIR__ . '/../../components/MenuRepo.php';
+require_once __DIR__ . '/../../utils/validator.php';
+require_once __DIR__ . '/../../utils/response.php';
 
 function table_exists(PDO $pdo, string $table): bool {
   $q = $pdo->prepare("SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?");
