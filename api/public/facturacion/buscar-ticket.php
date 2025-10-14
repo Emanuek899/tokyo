@@ -7,7 +7,7 @@ require_once dirname(__DIR__, 3) . '/utils/security.php';
 
 try {
     if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-        json_error('Metodo no permitido', 405);
+        json_error(['Metodo no permitido'], 405);
     }
 
     require_rate_limit('buscar-ticket', 30, 600);
