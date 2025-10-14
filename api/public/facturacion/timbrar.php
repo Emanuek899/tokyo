@@ -51,6 +51,11 @@ try {
     require_rate_limit('timbrar', 30, 600);
     require_csrf_token();
 
+    // Verificar configuración de Facturama
+    if (!getenv('FACTURAMA_USER') || !getenv('FACTURAMA_PASS')) {
+        json_error('Configuración de Facturama no disponible', 500);
+    }
+
     $body = json_decode(file_get_contents('php://input'), true) ?: [];
     $ticketId = (int)($body['ticket_id'] ?? 0);
     $rfc = strtoupper(trim((string)($body['rfc'] ?? '')));
@@ -123,10 +128,19 @@ try {
     ];
 
     // Timbrar
-    $res = Facturama::request('POST', '/api/3/cfdis', $cfdi);
+    try {
+        $res = Facturama::request('POST', '/api/3/cfdis', $cfdi);
+    } catch (Throwable $e) {
+        error_log("Error al llamar a Facturama: " . $e->getMessage());
+        $pdo->rollBack();
+        json_error('Error de conexión con Facturama', 500);
+        return;
+    }
+
     if (($res['status'] ?? 0) < 200 || ($res['status'] ?? 0) >= 300) {
         $msg = $res['json']['Message'] ?? ($res['json']['message'] ?? 'Error Facturama');
-        $detail = $res['json']['ModelState'] ?? null;
+        $detail = $res['json']['ModelState'] ?? ($res['json']['detail'] ?? null);
+        error_log("Error de Facturama: " . $msg . "\nDetalles: " . json_encode($detail));
         $pdo->rollBack();
         json_response(['ok'=>false, 'code'=>'TIMBRADO_ERROR', 'message'=>$msg, 'detail'=>$detail, 'status'=>$res['status'] ?? 0], 422);
     }
@@ -168,7 +182,16 @@ try {
     $pdo->commit();
     json_response(['ok'=>true, 'factura_id'=>$facturaId, 'uuid'=>$uuid, 'xml_url'=>'/tokyo/api/public/facturacion/descargar.php?uuid=' . urlencode($uuid) . '&tipo=xml', 'pdf_url'=>'/tokyo/api/public/facturacion/descargar.php?uuid=' . urlencode($uuid) . '&tipo=pdf']);
 } catch (Throwable $e) {
+    error_log("Error en timbrar.php: " . $e->getMessage() . "\n" . $e->getTraceAsString());
     try { DB::get()->rollBack(); } catch (Throwable $e2) {}
-    json_error('Error al timbrar', 500, $e->getMessage());
+    
+    // Determinar si es un error conocido
+    if ($e instanceof PDOException) {
+        json_error('Error de base de datos al procesar la factura', 500);
+    } else if (strpos($e->getMessage(), 'cURL') !== false) {
+        json_error('Error de conexión con Facturama', 500);
+    } else {
+        json_error('Error al generar la factura: ' . $e->getMessage(), 500);
+    }
 }
 

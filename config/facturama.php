@@ -63,6 +63,18 @@ class Facturama {
     }
 }
 
-function cfdi_expedition_cp(): string { return getenv('CFDI_EXPEDITION_CP') ?: '64000'; }
-function cfdi_serie(): string { return getenv('CFDI_SERIE') ?: 'A'; }
+function facturama_list_branch_offices() {
+    try {
+        $result = Facturama::request('GET', '/api/v3/BranchOffices');
+        if ($result['status'] !== 200 || !isset($result['json'])) {
+            return [];
+        }
+        return $result['json'];
+    } catch (Throwable $e) {
+        error_log("Error al obtener sucursales de Facturama: " . $e->getMessage());
+        return [];
+    }
+}
 
+function cfdi_expedition_cp(): string { return getenv('CFDI_EXPEDITION_CP') ?: '34217'; }
+function cfdi_serie(): string { return getenv('CFDI_SERIE') ?: 'A'; }

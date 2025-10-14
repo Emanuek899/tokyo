@@ -107,14 +107,19 @@ try {
     case 'nombre':
     default:            $orderSql = 'p.nombre ASC';
   }
+  // Preparar expresión para precio final (usada en SELECT)
+  $selectPrecio = $precioExpr . ' AS precio_final';
+
+  // Inyectar ORDER BY directamente (orderSql viene de una lista controlada arriba)
+  $params[':selectPrecio'] = $selectPrecio;
   $params[':offset'] = $offset;
   $params[':limit'] = $perPage;
-  $params[':orderSql'] = $orderSql;
 
   $pdo = DB::get();
   $repo = new MenuRepo($pdo);
   $total = $repo->contar($params, $joins, $wheres);
-  $items = $repo->listar($params, $joins, $wheres, $selectPrecio);
+  // Pasar también la instrucción ORDER y el flag de existencia de precio por sede
+  $items = $repo->listar($params, $joins, $wheres, $colPrecioSede, $orderSql);
   
   echo json_encode([
     'success'   => true,
