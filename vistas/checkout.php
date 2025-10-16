@@ -29,7 +29,7 @@
               <legend><strong>Paso 2:</strong> Datos de contacto/dirección</legend>
               <div class="grid" style="grid-template-columns: 1fr 1fr; gap: .75rem;">
                 <div class="field"><label>Nombre</label><input class="input" type="text" name="nombre" id="inp-nombre" required></div>
-                <div class="field"><label>Teléfono</label><input class="input" type="tel" name="telefono" id="inp-telefono" required></div>
+                <div class="field"><label>Teléfono</label><input class="input" type="tel" name="telefono" id="inp-telefono" required><span class="error-msg" id="telefono-error"> </span></div>
                 <div class="field" style="grid-column: span 2"><label>Email</label><input class="input" type="email" name="email" id="inp-email" placeholder="opcional"></div>
                 <div class="field" style="grid-column: span 2"><label>Dirección</label><input class="input" type="text" name="direccion" id="inp-direccion" placeholder="si aplica"></div>
               </div>
@@ -65,131 +65,177 @@
   </main>
   <?php include __DIR__.'/partials/footer.php'; ?>
   <script>
-    (function(){
-      const btn = document.getElementById('btn-pagar');
-      const msg = document.getElementById('msg');
-      const alertBox = document.getElementById('alert');
-      const sumSubtotal = document.getElementById('sum-subtotal');
-      const sumFee = document.getElementById('sum-fee');
-      const sumTotal = document.getElementById('sum-total');
-      const sumEnvio = document.getElementById('sum-envio');
-      const methodSel = document.getElementById('inp-metodo');
-      function setLoading(v){ btn.disabled = v; btn.textContent = v ? 'Redirigiendo…' : 'Ir a pagar con Conekta'; }
-      function selectCashTier(subtotal){
-        const tiers = (window.FeesCfg?.cash?.tiers)||[];
-        for (const t of tiers){ if (t.threshold == null || subtotal < Number(t.threshold)) return t; }
-        return tiers.length ? tiers[tiers.length-1] : null;
-      }
-      function grossUp(p,r,f,iva,minFee){
-        const denom = 1 - (1+iva)*r; if (Math.abs(denom) < 1e-9) return { total:p, surcharge:0 };
-        let A = (p + (1+iva)*f) / denom;
-        const C1 = ((A*r) + f) * (1+iva);
-        const Cmin = (minFee != null) ? (minFee*(1+iva)) : null;
-        if (Cmin != null && C1 < Cmin) { A = p + Cmin; }
-        return { total:A, surcharge:A-p };
-      }
-      function computeSurcharge(subtotal, method){
-        if (!window.PassThroughFees) return { total: subtotal, surcharge: 0 };
-        if (method === 'card'){
-          const f = window.FeesCfg.card || { rate:0, fixed:0, iva:0, min_fee:null };
-          return grossUp(subtotal, Number(f.rate||0), Number(f.fixed||0), Number(f.iva||0), f.min_fee!=null?Number(f.min_fee):null);
-        }
-        if (method === 'bank_transfer' || method === 'spei'){
-          const f = window.FeesCfg.spei || { fixed:0, iva:0 };
-          const s = (1+Number(f.iva||0))*Number(f.fixed||0);
-          return { total: subtotal + s, surcharge: s };
-        }
-        if (method === 'cash'){
-          const cfg = window.FeesCfg.cash || { iva:0, tiers:[] };
-          const t = selectCashTier(subtotal) || { rate:0, fixed:0, min_fee:null };
-          return grossUp(subtotal, Number(t.rate||0), Number(t.fixed||0), Number(cfg.iva||0), t.min_fee!=null?Number(t.min_fee):null);
-        }
-        return { total: subtotal, surcharge: 0 };
-      }
-      function fmt(n){ return '$'+Number(n).toFixed(2); }
-      async function recalcSummary(){
-        try {
-          const res = await fetch('../api/carrito/listar.php', { credentials:'same-origin' });
-          if(!res.ok) throw new Error('HTTP '+res.status);
-          const data = await res.json();
-          const subtotal = Number(data.subtotal||0);
-          const envio = Number(data.envio||0);
-          const m = methodSel?.value || 'card';
-          const calc = computeSurcharge(subtotal, m);
-          sumSubtotal.textContent = fmt(subtotal);
-          sumFee.textContent = fmt(calc.surcharge||0);
-          if (sumEnvio) sumEnvio.textContent = fmt(envio);
-          sumTotal.textContent = fmt((calc.total||subtotal)+envio);
-        } catch(e){ console.error('recalcSummary', e); }
-      }
-      function normalizePhone(raw){
-        const digits = String(raw||'').replace(/\D+/g,'');
-        if (!digits) return '';
-        if (digits.startsWith('52') && digits.length >= 12) return '+'+digits;
-        if (digits.length === 10) return '+52'+digits; // MX default
-        return '+'+digits;
-      }
-      async function startCheckout(){
-        setLoading(true); msg.textContent='';
-        alertBox.style.display='none'; alertBox.textContent='';
-        try {
-          const payload = {
-            nombre: document.getElementById('inp-nombre').value.trim(),
-            telefono: normalizePhone(document.getElementById('inp-telefono').value),
-            email: document.getElementById('inp-email').value.trim(),
-            metodos: [ document.getElementById('inp-metodo').value ],
-          };
-          const res = await fetch('../api/checkout/conekta_init.php', {
-            method:'POST', headers:{'Content-Type':'application/json'}, credentials:'same-origin', body: JSON.stringify(payload)
-          });
-          const data = await res.json().catch(()=>({}));
-          if(!res.ok || !data.success){
-            const rawDetails = (data && (data.details || data.error)) || `HTTP ${res.status}`;
-            // Log completo en consola
-            console.error('Checkout init error', rawDetails);
-            // Front: mensajes amigables para errores comunes (teléfono/email/datatypes)
-            let friendly = '';
-            const setPhoneMsg = () => friendly = 'numero de telefono no valido';
-            const setEmailMsg = () => friendly = 'formato de correo no valido';
-            const setGenericFormMsg = () => friendly = 'debe introducir datos validos en el formulario';
-            if (typeof rawDetails === 'string'){
-              try {
-                const idx = rawDetails.indexOf('{');
-                if (idx >= 0){
-                  const body = JSON.parse(rawDetails.slice(idx));
-                  const errs = Array.isArray(body.details) ? body.details : [];
-                  if (errs.some(e => String(e.param||'').includes('customer_info') && String(e.code||'').includes('invalid_datatype'))){
-                    setGenericFormMsg();
-                  } else if (errs.some(e => String(e.param||'').includes('customer_info.email') || String(e.code||'').includes('.email.invalid'))){
-                    setEmailMsg();
-                  } else if (errs.some(e => String(e.param||'').includes('customer_info.phone') || String(e.code||'').includes('invalid_phone_number'))){
-                    setPhoneMsg();
-                  }
-                }
-              } catch(_){}
-              if (!friendly && (rawDetails.includes('customer_info') && rawDetails.includes('invalid_datatype'))){
+(function(){
+  const btn = document.getElementById('btn-pagar');
+  const msg = document.getElementById('msg');
+  const alertBox = document.getElementById('alert');
+  const sumSubtotal = document.getElementById('sum-subtotal');
+  const sumFee = document.getElementById('sum-fee');
+  const sumTotal = document.getElementById('sum-total');
+  const sumEnvio = document.getElementById('sum-envio');
+  const methodSel = document.getElementById('inp-metodo');
+  const telefonoError = document.getElementById('telefono-error');
+
+  function setLoading(v){ 
+    btn.disabled = v; 
+    btn.textContent = v ? 'Redirigiendo…' : 'Ir a pagar con Conekta'; 
+  }
+
+  function selectCashTier(subtotal){
+    const tiers = (window.FeesCfg?.cash?.tiers)||[];
+    for (const t of tiers){ if (t.threshold == null || subtotal < Number(t.threshold)) return t; }
+    return tiers.length ? tiers[tiers.length-1] : null;
+  }
+
+  function grossUp(p,r,f,iva,minFee){
+    const denom = 1 - (1+iva)*r; if (Math.abs(denom) < 1e-9) return { total:p, surcharge:0 };
+    let A = (p + (1+iva)*f) / denom;
+    const C1 = ((A*r) + f) * (1+iva);
+    const Cmin = (minFee != null) ? (minFee*(1+iva)) : null;
+    if (Cmin != null && C1 < Cmin) { A = p + Cmin; }
+    return { total:A, surcharge:A-p };
+  }
+
+  function computeSurcharge(subtotal, method){
+    if (!window.PassThroughFees) return { total: subtotal, surcharge: 0 };
+    if (method === 'card'){
+      const f = window.FeesCfg.card || { rate:0, fixed:0, iva:0, min_fee:null };
+      return grossUp(subtotal, Number(f.rate||0), Number(f.fixed||0), Number(f.iva||0), f.min_fee!=null?Number(f.min_fee):null);
+    }
+    if (method === 'bank_transfer' || method === 'spei'){
+      const f = window.FeesCfg.spei || { fixed:0, iva:0 };
+      const s = (1+Number(f.iva||0))*Number(f.fixed||0);
+      return { total: subtotal + s, surcharge: s };
+    }
+    if (method === 'cash'){
+      const cfg = window.FeesCfg.cash || { iva:0, tiers:[] };
+      const t = selectCashTier(subtotal) || { rate:0, fixed:0, min_fee:null };
+      return grossUp(subtotal, Number(t.rate||0), Number(t.fixed||0), Number(cfg.iva||0), t.min_fee!=null?Number(t.min_fee):null);
+    }
+    return { total: subtotal, surcharge: 0 };
+  }
+
+  function fmt(n){ return '$'+Number(n).toFixed(2); }
+
+  async function recalcSummary(){
+    try {
+      const res = await fetch('../api/carrito/listar.php', { credentials:'same-origin' });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const data = await res.json();
+      const subtotal = Number(data.subtotal||0);
+      const envio = Number(data.envio||0);
+      const m = methodSel?.value || 'card';
+      const calc = computeSurcharge(subtotal, m);
+      sumSubtotal.textContent = fmt(subtotal);
+      sumFee.textContent = fmt(calc.surcharge||0);
+      if (sumEnvio) sumEnvio.textContent = fmt(envio);
+      sumTotal.textContent = fmt((calc.total||subtotal)+envio);
+    } catch(e){ console.error('recalcSummary', e); }
+  }
+
+  function normalizePhone(raw){
+    const digits = String(raw||'').replace(/\D+/g,'');
+    if (!digits) return '';
+    if (digits.startsWith('52') && digits.length >= 12) return '+'+digits;
+    if (digits.length === 10) return '+52'+digits; // MX default
+    return '+'+digits;
+  }
+
+  //función de validación de teléfono
+  function validarTelefono(tel){
+    const soloNumeros = /^[0-9]+$/;
+    telefonoError.textContent = ''; // limpia el mensaje anterior
+    if (!tel.trim()){
+      telefonoError.textContent = 'El teléfono es obligatorio';
+      return false;
+    }
+    if (!soloNumeros.test(tel)){
+      telefonoError.textContent = 'El teléfono solo debe contener números';
+      return false;
+    }
+    if (tel.length < 10){
+      telefonoError.textContent = 'El teléfono debe tener al menos 10 dígitos';
+      return false;
+    }
+    return true;
+  }
+
+  async function startCheckout(){
+    setLoading(true); 
+    msg.textContent='';
+    alertBox.style.display='none'; 
+    alertBox.textContent='';
+    telefonoError.textContent='';
+
+    const telInput = document.getElementById('inp-telefono').value.trim();
+
+    //Validar antes de enviar
+    if (!validarTelefono(telInput)){
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const payload = {
+        nombre: document.getElementById('inp-nombre').value.trim(),
+        telefono: normalizePhone(telInput),
+        email: document.getElementById('inp-email').value.trim(),
+        metodos: [ document.getElementById('inp-metodo').value ],
+      };
+      const res = await fetch('../api/checkout/conekta_init.php', {
+        method:'POST', 
+        headers:{'Content-Type':'application/json'}, 
+        credentials:'same-origin', 
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok || !data.success){
+        const rawDetails = (data && (data.details || data.error)) || `HTTP ${res.status}`;
+        console.error('Checkout init error', rawDetails);
+        let friendly = '';
+        const setPhoneMsg = () => friendly = 'número de teléfono no válido';
+        const setEmailMsg = () => friendly = 'formato de correo no válido';
+        const setGenericFormMsg = () => friendly = 'debe introducir datos válidos en el formulario';
+        if (typeof rawDetails === 'string'){
+          try {
+            const idx = rawDetails.indexOf('{');
+            if (idx >= 0){
+              const body = JSON.parse(rawDetails.slice(idx));
+              const errs = Array.isArray(body.details) ? body.details : [];
+              if (errs.some(e => String(e.param||'').includes('customer_info') && String(e.code||'').includes('invalid_datatype'))){
                 setGenericFormMsg();
-              }
-              if (!friendly && (rawDetails.includes('customer_info.email') || rawDetails.includes('.email.invalid'))){
+              } else if (errs.some(e => String(e.param||'').includes('customer_info.email') || String(e.code||'').includes('.email.invalid'))){
                 setEmailMsg();
-              }
-              if (!friendly && (rawDetails.includes('customer_info.phone') || rawDetails.includes('invalid_phone_number'))){
+              } else if (errs.some(e => String(e.param||'').includes('customer_info.phone') || String(e.code||'').includes('invalid_phone_number'))){
                 setPhoneMsg();
               }
             }
-            alertBox.textContent = friendly || ('No se pudo iniciar el pago: '+rawDetails);
-            alertBox.style.display = 'block';
-            return;
+          } catch(_){}
+          if (!friendly && (rawDetails.includes('customer_info') && rawDetails.includes('invalid_datatype'))){
+            setGenericFormMsg();
           }
-          window.location.href = data.checkout_url;
-        } catch(e){ console.error(e); msg.textContent = 'No se pudo iniciar el pago. '+(e.message||e); }
-        finally { setLoading(false); }
+          if (!friendly && (rawDetails.includes('customer_info.email') || rawDetails.includes('.email.invalid'))){
+            setEmailMsg();
+          }
+          if (!friendly && (rawDetails.includes('customer_info.phone') || rawDetails.includes('invalid_phone_number'))){
+            setPhoneMsg();
+          }
+        }
+        alertBox.textContent = friendly || ('No se pudo iniciar el pago: '+rawDetails);
+        alertBox.style.display = 'block';
+        return;
       }
-      btn?.addEventListener('click', (e)=>{ e.preventDefault(); startCheckout(); });
-      methodSel?.addEventListener('change', recalcSummary);
-      recalcSummary();
-    })();
-  </script>
-</body>
-</html>
+      window.location.href = data.checkout_url;
+    } catch(e){ 
+      console.error(e); 
+      msg.textContent = 'No se pudo iniciar el pago. '+(e.message||e); 
+    } finally { 
+      setLoading(false); 
+    }
+  }
 
+  btn?.addEventListener('click', (e)=>{ e.preventDefault(); startCheckout(); });
+  methodSel?.addEventListener('change', recalcSummary);
+  recalcSummary();
+})();
+</script>
