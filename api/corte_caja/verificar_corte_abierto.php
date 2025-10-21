@@ -17,6 +17,6 @@ try {
     if (!empty($res['corte_id'])) $out['resultado']['corte_id'] = (int)$res['corte_id'];
     echo json_encode($out, JSON_UNESCAPED_UNICODE);
 } catch (Throwable $e) {
-    json_error('Error al verificar corte', 500, $e->getMessage());
+    json_error(['Error al verificar corte'], 500, $e->getMessage());
 }
 
