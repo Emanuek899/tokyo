@@ -20,10 +20,15 @@ require_once $CFG;
 require_once $UTL;
 if (is_file($FCT)) require_once $FCT;
 require_once __DIR__ . '/../../components/FacturacionRepo.php';
+require_once __DIR__ . '/../../components/FacturacionRepo.php';
 
+function getTicketId(PDO $pdo, int $ticketId, int $folioIn, FacturacionRepo $repo): int {
 function getTicketId(PDO $pdo, int $ticketId, int $folioIn, FacturacionRepo $repo): int {
     // a) Si viene un ticketId válido y existe por ID, úsalo.
     if ($ticketId > 0) {
+        $sql = 'SELECT id FROM tickets WHERE id = ? LIMIT 1';
+        $q = $repo->select($sql, [$ticketId], 'column');
+        if (!empty($q)) return $ticketId;
         $sql = 'SELECT id FROM tickets WHERE id = ? LIMIT 1';
         $q = $repo->select($sql, [$ticketId], 'column');
         if (!empty($q)) return $ticketId;
@@ -34,12 +39,18 @@ function getTicketId(PDO $pdo, int $ticketId, int $folioIn, FacturacionRepo $rep
             $sql = 'SELECT id FROM tickets WHERE folio = ? LIMIT 1';
             $q = $repo->select($sql, [$ticketId], 'fetch');
             $row = $q;
+            $sql = 'SELECT id FROM tickets WHERE folio = ? LIMIT 1';
+            $q = $repo->select($sql, [$ticketId], 'fetch');
+            $row = $q;
             if ($row) return (int)$row['id'];
         }
     }
 
     // Si vino folio explícito, resolver a id
     if ($folioIn > 0) {
+        $sql = 'SELECT id FROM tickets WHERE folio = ? LIMIT 1';
+        $q = $repo->select($sql, [$folioIn], 'fetch');
+        $row = $q;
         $sql = 'SELECT id FROM tickets WHERE folio = ? LIMIT 1';
         $q = $repo->select($sql, [$folioIn], 'fetch');
         $row = $q;
@@ -53,6 +64,7 @@ try {
     // Validar método HTTP
     if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
         json_error(['Método no permitido'], 405);
+        json_error(['Método no permitido'], 405);
     }
 
     // Parsear body JSON
@@ -65,10 +77,12 @@ try {
 
     if (($ticketIdRaw <= 0 && $folioIn <= 0) || $clienteId <= 0) {
         json_error(['Se requiere ticket_id o folio, y cliente_id'], 422, ['body'=>$body]);
+        json_error(['Se requiere ticket_id o folio, y cliente_id'], 422, ['body'=>$body]);
     }
 
     // Iniciar transacción
     $pdo = DB::get();
+    $repo = new FacturacionRepo($pdo);
     $repo = new FacturacionRepo($pdo);
     $pdo->beginTransaction();
 
@@ -78,12 +92,17 @@ try {
 
     // Resolver ticket_id válido (acepta que te manden el folio en ticket_id)
     $ticketId = getTicketId($pdo, $ticketIdRaw, $folioIn, $repo);
+    $ticketId = getTicketId($pdo, $ticketIdRaw, $folioIn, $repo);
     if ($ticketId <= 0) {
         $pdo->rollBack();
+        json_error(['Ticket no encontrado'], 404, ['ticket_id'=>$ticketIdRaw, 'folio'=>$folioIn, 'db'=>$dbName]);
         json_error(['Ticket no encontrado'], 404, ['ticket_id'=>$ticketIdRaw, 'folio'=>$folioIn, 'db'=>$dbName]);
     }
 
     // Idempotencia: si ya existe factura para ese ticket, regrésala
+    $sql = 'SELECT id FROM facturas WHERE ticket_id = ? LIMIT 1';
+    $q = $repo->select($sql, [$ticketId], 'column');
+    $existingFacturaId = (int)($q ?: 0);
     $sql = 'SELECT id FROM facturas WHERE ticket_id = ? LIMIT 1';
     $q = $repo->select($sql, [$ticketId], 'column');
     $existingFacturaId = (int)($q ?: 0);
@@ -97,7 +116,17 @@ try {
             'SELECT * FROM vista_factura_detalles WHERE factura_id = ?',
             [$existingFacturaId]
         );
+        $f = $repo->select(
+            'SELECT * FROM vista_facturas WHERE factura_id = ?',
+            [$existingFacturaId],
+            'fetch'
+        );
+        $fd = $repo->select(
+            'SELECT * FROM vista_factura_detalles WHERE factura_id = ?',
+            [$existingFacturaId]
+        );
         $pdo->commit();
+        json_response(['factura' => $f, 'detalles' => $fd, 'idempotent'=>true]);
         json_response(['factura' => $f, 'detalles' => $fd, 'idempotent'=>true]);
     }
 
@@ -108,16 +137,28 @@ try {
         'fetch'
     );
     $ticket = $t;
+    $t = $repo->select(
+        'SELECT id, folio, total, fecha FROM tickets WHERE id = ? LIMIT 1',
+        [$ticketId],
+        'fetch'
+    );
+    $ticket = $t;
     if (!$ticket) {
         $pdo->rollBack();
+        json_error(['Ticket no encontrado'], 404, ['ticket_id'=>$ticketId, 'db'=>$dbName]);
         json_error(['Ticket no encontrado'], 404, ['ticket_id'=>$ticketId, 'db'=>$dbName]);
     }
 
     // Detalles del ticket
     $d = $repo->select('
+    $d = $repo->select('
         SELECT td.id, td.producto_id, td.cantidad, td.precio_unitario, p.nombre AS producto
         FROM ticket_detalles td
         LEFT JOIN productos p ON p.id = td.producto_id
+        WHERE td.ticket_id = ?',
+        [$ticketId],
+    );
+    $detalles = $d;
         WHERE td.ticket_id = ?',
         [$ticketId],
     );
@@ -137,7 +178,12 @@ try {
     $folioFactura = 'F-' . $ticket['folio'];
     $uuid = bin2hex(random_bytes(8));
     $insF = $repo->insert('
+    $insF = $repo->insert('
         INSERT INTO facturas (ticket_id, cliente_id, folio, uuid, subtotal, impuestos, total, fecha_emision, estado)
+        VALUES (?,?,?,?,?,?,?,NOW(),"generada")',
+        [(int)$ticket['id'], $clienteId, $folioFactura, $uuid, $subtotal, $impuestos, $total]
+    );
+    $facturaId = (int)$insF;
         VALUES (?,?,?,?,?,?,?,NOW(),"generada")',
         [(int)$ticket['id'], $clienteId, $folioFactura, $uuid, $subtotal, $impuestos, $total]
     );
@@ -156,11 +202,27 @@ try {
     );
 
 
+    // Si existe integración Facturama, intentar timbrar ahora
+    }
+    $insD = $repo->insert('
+        INSERT INTO factura_detalles
+        (factura_id, ticket_detalle_id, producto_id, descripcion, cantidad, precio_unitario, importe)
+        VALUES (?,?,?,?,?,?,?)',
+        [$facturaId, (int)$row['id'], (int)$row['producto_id'], $row['producto'], $cant, $pu, $cant * $pu]
+    );
+
+
     // ============================================
     // INTEGRACIÓN CON FACTURAMA (TIMBRADO)
     // ============================================
     if (function_exists('facturama_create_cfdi')) {
         // Traer datos del cliente para receptor
+        $clQ = $repo->select('
+            SELECT * FROM clientes_facturacion WHERE id = ? LIMIT 1',
+            [$clienteId],
+            'fetch'
+        );
+        $cli = $clQ ?: [];
         $clQ = $repo->select('
             SELECT * FROM clientes_facturacion WHERE id = ? LIMIT 1',
             [$clienteId],
@@ -265,6 +327,7 @@ try {
             // Si falla Facturama, revertir toda la transacción
             $pdo->rollBack();
             json_error(['Error al timbrar con Facturama'], 502, $fe->getMessage());
+            json_error(['Error al timbrar con Facturama'], 502, $fe->getMessage());
         }
     }
 
@@ -278,9 +341,20 @@ try {
         'SELECT * FROM vista_factura_detalles WHERE factura_id = ?',
         [$facturaId]
     );
+    $f  = $repo->select(
+        'SELECT * FROM vista_facturas WHERE factura_id = ?',
+        [$facturaId],
+        'fetch'
+    );
+    $fd = $repo->select(
+        'SELECT * FROM vista_factura_detalles WHERE factura_id = ?',
+        [$facturaId]
+    );
     $pdo->commit();
+    json_response(['factura' => $f, 'detalles' => $fd]);
     json_response(['factura' => $f, 'detalles' => $fd]);
 } catch (Throwable $e) {
     try { DB::get()->rollBack(); } catch (Throwable $e2) {}
+    json_error(['Error al generar factura'], 500, $e->getMessage());
     json_error(['Error al generar factura'], 500, $e->getMessage());
 }

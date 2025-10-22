@@ -109,6 +109,7 @@ class Facturama
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $err = curl_error($ch);
         $code = curl_errno($ch);
+        $code = curl_errno($ch);
         curl_close($ch);
 
         // Validar respuesta

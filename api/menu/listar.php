@@ -26,7 +26,7 @@ function column_exists(PDO $pdo, string $table, string $column): bool {
 try {
   header('Content-Type: application/json; charset=utf-8');
 
-  $pdo = DB::get("A");
+  $pdo = DB::get();
   $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
   // Params de entrada
