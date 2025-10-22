@@ -39,7 +39,7 @@
       <div class="card__body">
         <div class="flex justify-between items-center">
           <h3 class="title">${p.nombre||''}</h3>
-          <div class="price">$${Number(p.precio_final||0).toFixed(2)}MX</div>
+          <div class="price">$${Number(p.precio_final|| p.precio).toFixed(2)}MX</div>
         </div>
         <div class="badges">${stateBadge}</div>
         <div class="mt-2">${tags}</div>

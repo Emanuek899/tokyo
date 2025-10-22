@@ -5,6 +5,8 @@ require_once dirname(__DIR__, 2) . '/config/db.php';
 require_once dirname(__DIR__, 2) . '/config/conekta.php';
 require_once dirname(__DIR__, 2) . '/utils/response.php';
 require_once dirname(__DIR__, 2) . '/utils/corte.php';
+require_once dirname(__DIR__, 2) . '/components/CheckoutRepo.php';
+
 
 // FIX: Conekta Accept v2.2.0 + Bearer; log 4xx/5xx
 function http_get(string $url, array $headers = []): array {
@@ -115,10 +117,11 @@ function create_local_sale(PDO $pdo, array $cart, array $context): int {
 
 try {
     if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-        json_error('Método no permitido', 405);
+        json_error(['Método no permitido'], 405);
     }
 
     $pdo = DB::get();
+    $repo = new CheckoutRepo($pdo);
     $raw = file_get_contents('php://input') ?: '';
     $evt = json_decode($raw, true) ?: [];
 
@@ -135,13 +138,14 @@ try {
     $ref = (string)($metadata['ref'] ?? ($evt['data']['object']['metadata']['ref'] ?? ''));
 
     // Persist event for traceability
-    $insEvt = $pdo->prepare('INSERT INTO conekta_events (reference, event_type, conekta_event_id, payload) VALUES (:ref, :type, :eid, :payload)');
-    $insEvt->execute([
+    $sql = 'INSERT INTO conekta_events (reference, event_type, conekta_event_id, payload) VALUES (:ref, :type, :eid, :payload)';
+    $params = [
         ':ref' => $ref ?: null,
         ':type' => $event_type ?: 'unknown',
         ':eid' => $event_id ?: null,
         ':payload' => $raw ?: null,
-    ]);
+    ];
+    $insEvt = $repo->insert($sql, $params);
 
     // Try to locate our payment row
     $row = null;

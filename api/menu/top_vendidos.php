@@ -30,5 +30,6 @@ try {
     json_response($items);
 } catch (Throwable $e) {
     json_error(['Error al listar top vendidos', 500, $e->getMessage()]);
+    json_error(['Error al listar top vendidos'], 500, $e->getMessage());
 }
 

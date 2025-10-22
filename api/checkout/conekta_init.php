@@ -96,16 +96,16 @@ function computeSurchargeServer(float $subtotal, string $method, array $feesCfg)
 
 try {
     if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-        json_error('Método no permitido', 405);
+        json_error(['Método no permitido'], 405);
     }
     if (!ConektaCfg::privateKey()) {
-        json_error('Conekta no configurado (CONEKTA_PRIVATE_KEY)', 500);
+        json_error(['Conekta no configurado (CONEKTA_PRIVATE_KEY)'], 500);
     }
 
     $pdo = DB::get();
     $cart = cart_get_all();
     if (empty($cart)) {
-        json_error('Carrito vacío', 422);
+        json_error(['Carrito vacío'], 422);
     }
     $input = json_decode(file_get_contents('php://input'), true) ?: [];
     $customer_name  = trim((string)($input['nombre'] ?? 'Cliente Tokyo'));
@@ -143,7 +143,7 @@ try {
             'precio' => (float)$r['precio'],
         ];
     }
-    if (!$prodMap) json_error('Carrito inválido', 422);
+    if (!$prodMap) json_error(['Carrito inválido'], 422);
 
     $line_items = [];
     $amount_total = 0; // in cents
@@ -162,7 +162,7 @@ try {
         $amount_total += $unit_cents * $qty;
         $subtotal_mx += $precio * $qty;
     }
-    if (!$line_items) json_error('Carrito inválido', 422);
+    if (!$line_items) json_error(['Carrito inválido'], 422);
 
     // Surcharge gross-up calculation (server-side authority)
     $feesCfg = ConektaCfg::feesCfg();
