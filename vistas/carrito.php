@@ -74,6 +74,9 @@
 
       if (!resp.items || resp.items.length === 0) {
         console.log('El carrito está vacío');
+        
+
+        
         verificarCarritoVacio();
         return;
       }

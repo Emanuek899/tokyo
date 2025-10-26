@@ -5,9 +5,58 @@
   <?php include __DIR__.'/partials/head.php'; ?>
   <?php require_once __DIR__.'/../config/conekta.php'; ?>
   <meta charset="utf-8">
-  <style>.muted{color:#666;font-size:.9rem}</style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    .muted{color:#666;font-size:.9rem}
+    .error-msg{color:#dc2626;font-size:.85rem;display:block;min-height:1.2rem;margin-top:.25rem}
+    
+    /* Responsive Grid */
+    .checkout-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 2rem;
+    }
+    
+    @media (max-width: 968px) {
+      .checkout-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+    }
+    
+    @media (max-width: 640px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .form-grid .field[style*="span 2"] {
+        grid-column: span 1 !important;
+      }
+    }
+    
+    .field-full {
+      grid-column: span 2;
+    }
+    
+    @media (max-width: 640px) {
+      .field-full {
+        grid-column: span 1;
+      }
+    }
+    
+    .input.error, .select.error {
+      border-color: #dc2626;
+    }
+    
+    .hidden {
+      display: none;
+    }
+  </style>
   <script>
-    // Exponer configuración de recargos al frontend
     window.PassThroughFees = <?php echo ConektaCfg::passThroughEnabled() ? 'true' : 'false'; ?>;
     window.FeesCfg = <?php $fc=ConektaCfg::feesCfg(); echo json_encode($fc['fees'], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES); ?>;
   </script>
@@ -16,27 +65,57 @@
   <?php include __DIR__.'/partials/header.php'; ?>
   <main>
     <section class="section">
-      <div class="container grid" style="grid-template-columns: 1.5fr 1fr; gap: 2rem;">
+      <div class="container checkout-grid">
         <form class="card" action="#" method="post" aria-labelledby="checkout-title" onsubmit="return false;" id="checkout-form">
           <div class="card__body">
             <div class="section-header"><h2 id="checkout-title">Checkout</h2></div>
+            
             <fieldset class="mt-3">
               <legend><strong>Paso 1:</strong> Método</legend>
-              <label class="flex items-center gap-2 mt-2"><input type="radio" name="metodo" value="pickup" checked> Pickup</label>
-              <label class="flex items-center gap-2 mt-2"><input type="radio" name="metodo" value="delivery"> Delivery</label>
+              <label class="flex items-center gap-2 mt-2">
+                <input type="radio" name="metodo" value="pickup" checked> Pickup
+              </label>
+              <label class="flex items-center gap-2 mt-2">
+                <input type="radio" name="metodo" value="delivery"> Delivery
+              </label>
             </fieldset>
+            
             <fieldset class="mt-3">
               <legend><strong>Paso 2:</strong> Datos de contacto/dirección</legend>
-              <div class="grid" style="grid-template-columns: 1fr 1fr; gap: .75rem;">
-                <div class="field"><label>Nombre</label><input class="input" type="text" name="nombre" id="inp-nombre" required></div>
-                <div class="field"><label>Teléfono</label><input class="input" type="tel" name="telefono" id="inp-telefono" required><span class="error-msg" id="telefono-error"> </span></div>
-                <div class="field" style="grid-column: span 2"><label>Email</label><input class="input" type="email" name="email" id="inp-email" placeholder="opcional"></div>
-                <div class="field" style="grid-column: span 2"><label>Dirección</label><input class="input" type="text" name="direccion" id="inp-direccion" placeholder="si aplica"></div>
+              <div class="form-grid">
+                <div class="field">
+                  <label>Nombre *</label>
+                  <input class="input" type="text" name="nombre" id="inp-nombre" required>
+                  <span class="error-msg" id="nombre-error"></span>
+                </div>
+                <div class="field">
+                  <label>Teléfono *</label>
+                  <input class="input" type="tel" name="telefono" id="inp-telefono" required>
+                  <span class="error-msg" id="telefono-error"></span>
+                </div>
+                <div class="field field-full">
+                  <label>Email</label>
+                  <input class="input" type="email" name="email" id="inp-email" placeholder="opcional">
+                  <span class="error-msg" id="email-error"></span>
+                </div>
+                <div class="field field-full" id="field-direccion">
+                  <label>Dirección <span id="direccion-required"></span></label>
+                  <input class="input" type="text" name="direccion" id="inp-direccion" placeholder="Calle, número, colonia">
+                  <span class="error-msg" id="direccion-error"></span>
+                </div>
+                <div class="field" id="field-cp">
+                  <label>Código Postal <span id="cp-required"></span></label>
+                  <input class="input" type="text" name="cp" id="inp-cp" placeholder="34000" maxlength="5">
+                  <span class="error-msg" id="cp-error"></span>
+                </div>
+                
               </div>
             </fieldset>
+            
             <fieldset class="mt-3">
               <legend><strong>Paso 3:</strong> Pago</legend>
-              <div class="field"><label>Método</label>
+              <div class="field">
+                <label>Método</label>
                 <select class="select" id="inp-metodo">
                   <option value="card" selected>Tarjeta</option>
                   <option value="cash">Efectivo (OXXO)</option>
@@ -44,11 +123,13 @@
                 </select>
               </div>
             </fieldset>
+            
             <button class="btn custom-btn mt-4" id="btn-pagar">Ir a pagar con Conekta</button>
             <div id="alert" class="mt-2" style="display:none; background:#fdecea;color:#611a15;padding:.5rem .75rem;border-radius:6px"></div>
             <p class="mt-2 muted" id="msg"></p>
           </div>
         </form>
+        
         <aside>
           <div class="card">
             <div class="card__body">
@@ -64,6 +145,7 @@
     </section>
   </main>
   <?php include __DIR__.'/partials/footer.php'; ?>
+  
   <script>
 (function(){
   const btn = document.getElementById('btn-pagar');
@@ -74,7 +156,56 @@
   const sumTotal = document.getElementById('sum-total');
   const sumEnvio = document.getElementById('sum-envio');
   const methodSel = document.getElementById('inp-metodo');
+  
+  // Inputs y errores
+  const nombreInput = document.getElementById('inp-nombre');
+  const telefonoInput = document.getElementById('inp-telefono');
+  const emailInput = document.getElementById('inp-email');
+  const direccionInput = document.getElementById('inp-direccion');
+  const cpInput = document.getElementById('inp-cp');
+  
+  const nombreError = document.getElementById('nombre-error');
   const telefonoError = document.getElementById('telefono-error');
+  const emailError = document.getElementById('email-error');
+  const direccionError = document.getElementById('direccion-error');
+  const cpError = document.getElementById('cp-error');
+  
+  const metodoRadios = document.querySelectorAll('input[name="metodo"]');
+  const fieldDireccion = document.getElementById('field-direccion');
+  const fieldCp = document.getElementById('field-cp');
+  const direccionRequired = document.getElementById('direccion-required');
+  const cpRequired = document.getElementById('cp-required');
+
+  let isDelivery = false;
+
+  // Función para mostrar/ocultar campos de delivery
+  function toggleDeliveryFields() {
+    const selectedMetodo = document.querySelector('input[name="metodo"]:checked')?.value;
+    isDelivery = selectedMetodo === 'delivery';
+    
+    if (isDelivery) {
+      direccionRequired.textContent = '*';
+      cpRequired.textContent = '*';
+      direccionInput.required = true;
+      cpInput.required = true;
+    } else {
+      direccionRequired.textContent = '';
+      cpRequired.textContent = '';
+      direccionInput.required = false;
+      cpInput.required = false;
+      // Limpiar errores si cambia a pickup
+      clearFieldError(direccionInput, direccionError);
+      clearFieldError(cpInput, cpError);
+    }
+  }
+
+  // Escuchar cambios en método de entrega
+  metodoRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      toggleDeliveryFields();
+      recalcSummary(); // Recalcular cuando cambia el método
+    });
+  });
 
   function setLoading(v){ 
     btn.disabled = v; 
@@ -123,7 +254,11 @@
       if(!res.ok) throw new Error('HTTP '+res.status);
       const data = await res.json();
       const subtotal = Number(data.subtotal||0);
-      const envio = Number(data.envio||0);
+      
+      // Calcular envío: $30 si es delivery, $0 si es pickup
+      const selectedMetodo = document.querySelector('input[name="metodo"]:checked')?.value;
+      const envio = selectedMetodo === 'delivery' ? 30 : 0;
+      
       const m = methodSel?.value || 'card';
       const calc = computeSurcharge(subtotal, m);
       sumSubtotal.textContent = fmt(subtotal);
@@ -137,105 +272,222 @@
     const digits = String(raw||'').replace(/\D+/g,'');
     if (!digits) return '';
     if (digits.startsWith('52') && digits.length >= 12) return '+'+digits;
-    if (digits.length === 10) return '+52'+digits; // MX default
+    if (digits.length === 10) return '+52'+digits;
     return '+'+digits;
   }
 
-  //función de validación de teléfono
-  function validarTelefono(tel){
-    const soloNumeros = /^[0-9]+$/;
-    telefonoError.textContent = ''; // limpia el mensaje anterior
-    if (!tel.trim()){
-      telefonoError.textContent = 'El teléfono es obligatorio';
+  // Funciones de validación
+  function showFieldError(input, errorSpan, message) {
+    input.classList.add('error');
+    errorSpan.textContent = message;
+  }
+
+  function clearFieldError(input, errorSpan) {
+    input.classList.remove('error');
+    errorSpan.textContent = '';
+  }
+
+  function validarNombre(nombre) {
+    clearFieldError(nombreInput, nombreError);
+    if (!nombre.trim()) {
+      showFieldError(nombreInput, nombreError, 'El nombre es obligatorio');
       return false;
     }
-    if (!soloNumeros.test(tel)){
-      telefonoError.textContent = 'El teléfono solo debe contener números';
-      return false;
-    }
-    if (tel.length < 10){
-      telefonoError.textContent = 'El teléfono debe tener al menos 10 dígitos';
+    if (nombre.trim().length < 3) {
+      showFieldError(nombreInput, nombreError, 'El nombre debe tener al menos 3 caracteres');
       return false;
     }
     return true;
   }
 
+  function validarTelefono(tel) {
+    const soloNumeros = /^[0-9]+$/;
+    clearFieldError(telefonoInput, telefonoError);
+    
+    if (!tel.trim()) {
+      showFieldError(telefonoInput, telefonoError, 'El teléfono es obligatorio');
+      return false;
+    }
+    if (!soloNumeros.test(tel)) {
+      showFieldError(telefonoInput, telefonoError, 'El teléfono solo debe contener números');
+      return false;
+    }
+    if (tel.length < 10) {
+      showFieldError(telefonoInput, telefonoError, 'El teléfono debe tener al menos 10 dígitos');
+      return false;
+    }
+    return true;
+  }
+
+  function validarEmail(email) {
+    clearFieldError(emailInput, emailError);
+    
+    if (!email.trim()) {
+      return true; // Email es opcional
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      showFieldError(emailInput, emailError, 'Formato de email no válido');
+      return false;
+    }
+    return true;
+  }
+
+  function validarDireccion(direccion) {
+    clearFieldError(direccionInput, direccionError);
+    
+    if (!isDelivery) {
+      return true; // No es necesario en pickup
+    }
+    
+    if (!direccion.trim()) {
+      showFieldError(direccionInput, direccionError, 'La dirección es obligatoria para delivery');
+      return false;
+    }
+    if (direccion.trim().length < 10) {
+      showFieldError(direccionInput, direccionError, 'La dirección debe ser más detallada (min. 10 caracteres)');
+      return false;
+    }
+    return true;
+  }
+
+  function validarCP(cp) {
+    clearFieldError(cpInput, cpError);
+    
+    if (!isDelivery) {
+      return true; // No es necesario en pickup
+    }
+    
+    const cpLimpio = cp.trim();
+    if (!cpLimpio) {
+      showFieldError(cpInput, cpError, 'El código postal es obligatorio para delivery');
+      return false;
+    }
+    
+    if (!/^[0-9]{5}$/.test(cpLimpio)) {
+      showFieldError(cpInput, cpError, 'El código postal debe tener 5 dígitos');
+      return false;
+    }
+    
+    return true;
+  }
+
+  // Validaciones automaticas
+  nombreInput.addEventListener('blur', () => validarNombre(nombreInput.value));
+  telefonoInput.addEventListener('blur', () => validarTelefono(telefonoInput.value));
+  emailInput.addEventListener('blur', () => validarEmail(emailInput.value));
+  direccionInput.addEventListener('blur', () => validarDireccion(direccionInput.value));
+  cpInput.addEventListener('blur', () => validarCP(cpInput.value));
+
+  // Limpiar error al escribir
+  nombreInput.addEventListener('input', () => {
+    if (nombreError.textContent) clearFieldError(nombreInput, nombreError);
+  });
+  telefonoInput.addEventListener('input', () => {
+    if (telefonoError.textContent) clearFieldError(telefonoInput, telefonoError);
+  });
+  emailInput.addEventListener('input', () => {
+    if (emailError.textContent) clearFieldError(emailInput, emailError);
+  });
+  direccionInput.addEventListener('input', () => {
+    if (direccionError.textContent) clearFieldError(direccionInput, direccionError);
+  });
+  cpInput.addEventListener('input', () => {
+    if (cpError.textContent) clearFieldError(cpInput, cpError);
+  });
+
   async function startCheckout(){
     setLoading(true); 
-    msg.textContent='';
-    alertBox.style.display='none'; 
-    alertBox.textContent='';
-    telefonoError.textContent='';
+    msg.textContent = '';
+    alertBox.style.display = 'none'; 
+    alertBox.textContent = '';
 
-    const telInput = document.getElementById('inp-telefono').value.trim();
+    // Validar todos los campos
+    const nombreVal = nombreInput.value.trim();
+    const telefonoVal = telefonoInput.value.trim();
+    const emailVal = emailInput.value.trim();
+    const direccionVal = direccionInput.value.trim();
+    const cpVal = cpInput.value.trim();
 
-    //Validar antes de enviar
-    if (!validarTelefono(telInput)){
+    const nombreValido = validarNombre(nombreVal);
+    const telefonoValido = validarTelefono(telefonoVal);
+    const emailValido = validarEmail(emailVal);
+    const direccionValida = validarDireccion(direccionVal);
+    const cpValido = validarCP(cpVal);
+
+    if (!nombreValido || !telefonoValido || !emailValido || !direccionValida || !cpValido) {
       setLoading(false);
+      alertBox.textContent = 'Por favor, corrija los errores en el formulario';
+      alertBox.style.display = 'block';
+      // Scroll al primer error
+      const firstError = document.querySelector('.input.error');
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return;
     }
 
     try {
       const payload = {
-        nombre: document.getElementById('inp-nombre').value.trim(),
-        telefono: normalizePhone(telInput),
-        email: document.getElementById('inp-email').value.trim(),
-        metodos: [ document.getElementById('inp-metodo').value ],
+        nombre: nombreVal,
+        telefono: normalizePhone(telefonoVal),
+        email: emailVal || undefined,
+        metodos: [document.getElementById('inp-metodo').value],
+        direccion: isDelivery ? direccionVal : undefined,
+        cp: isDelivery ? cpVal : undefined
       };
+
       const res = await fetch('../api/checkout/conekta_init.php', {
-        method:'POST', 
-        headers:{'Content-Type':'application/json'}, 
-        credentials:'same-origin', 
+        method: 'POST', 
+        headers: {'Content-Type': 'application/json'}, 
+        credentials: 'same-origin', 
         body: JSON.stringify(payload)
       });
-      const data = await res.json().catch(()=>({}));
-      if(!res.ok || !data.success){
+
+      const data = await res.json().catch(() => ({}));
+      
+      if (!res.ok || !data.success) {
         const rawDetails = (data && (data.details || data.error)) || `HTTP ${res.status}`;
         console.error('Checkout init error', rawDetails);
+        
         let friendly = '';
-        const setPhoneMsg = () => friendly = 'número de teléfono no válido';
-        const setEmailMsg = () => friendly = 'formato de correo no válido';
-        const setGenericFormMsg = () => friendly = 'debe introducir datos válidos en el formulario';
-        if (typeof rawDetails === 'string'){
-          try {
-            const idx = rawDetails.indexOf('{');
-            if (idx >= 0){
-              const body = JSON.parse(rawDetails.slice(idx));
-              const errs = Array.isArray(body.details) ? body.details : [];
-              if (errs.some(e => String(e.param||'').includes('customer_info') && String(e.code||'').includes('invalid_datatype'))){
-                setGenericFormMsg();
-              } else if (errs.some(e => String(e.param||'').includes('customer_info.email') || String(e.code||'').includes('.email.invalid'))){
-                setEmailMsg();
-              } else if (errs.some(e => String(e.param||'').includes('customer_info.phone') || String(e.code||'').includes('invalid_phone_number'))){
-                setPhoneMsg();
-              }
-            }
-          } catch(_){}
-          if (!friendly && (rawDetails.includes('customer_info') && rawDetails.includes('invalid_datatype'))){
-            setGenericFormMsg();
-          }
-          if (!friendly && (rawDetails.includes('customer_info.email') || rawDetails.includes('.email.invalid'))){
-            setEmailMsg();
-          }
-          if (!friendly && (rawDetails.includes('customer_info.phone') || rawDetails.includes('invalid_phone_number'))){
-            setPhoneMsg();
+        if (typeof rawDetails === 'string') {
+          if (rawDetails.includes('customer_info.phone') || rawDetails.includes('invalid_phone_number')) {
+            friendly = 'Número de teléfono no válido';
+          } else if (rawDetails.includes('customer_info.email') || rawDetails.includes('.email.invalid')) {
+            friendly = 'Formato de correo no válido';
+          } else if (rawDetails.includes('customer_info') && rawDetails.includes('invalid_datatype')) {
+            friendly = 'Debe introducir datos válidos en el formulario';
           }
         }
-        alertBox.textContent = friendly || ('No se pudo iniciar el pago: '+rawDetails);
+        
+        alertBox.textContent = friendly || ('No se pudo iniciar el pago: ' + rawDetails);
         alertBox.style.display = 'block';
         return;
       }
+      
       window.location.href = data.checkout_url;
-    } catch(e){ 
+    } catch(e) { 
       console.error(e); 
-      msg.textContent = 'No se pudo iniciar el pago. '+(e.message||e); 
+      alertBox.textContent = 'No se pudo iniciar el pago. ' + (e.message || e);
+      alertBox.style.display = 'block';
     } finally { 
       setLoading(false); 
     }
   }
 
-  btn?.addEventListener('click', (e)=>{ e.preventDefault(); startCheckout(); });
+  btn?.addEventListener('click', (e) => { 
+    e.preventDefault(); 
+    startCheckout(); 
+  });
+  
   methodSel?.addEventListener('change', recalcSummary);
+  
+  // Inicializar
+  toggleDeliveryFields();
   recalcSummary();
 })();
 </script>
+</body>
+</html>
