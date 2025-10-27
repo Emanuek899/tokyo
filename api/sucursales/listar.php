@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../utils/response.php';
 require_once __DIR__ . '/../../config/db.php';
+require_once dirname(__DIR__, 2) . '/components/sucursalesRepo.php';
 
 try {
     $pdo = null;
@@ -10,13 +11,14 @@ try {
 
     if ($pdo) {
         // Leer desde DB tabla sedes
+        $repo = new sucursalesRepo($pdo);
+
         if ($sedeId > 0) {
-            $stmt = $pdo->prepare("SELECT id, nombre, direccion, telefono, correo, web, activo FROM sedes WHERE activo = 1 AND id = ?");
-            $stmt->execute([$sedeId]);
-            $rows = $stmt->fetchAll();
+            $sql = "SELECT id, nombre, direccion, telefono, correo, web, activo FROM sedes WHERE activo = 1 AND id = ?";
+            $rows = $repo->select($sql, [$sede_id]);
         } else {
             $sql = "SELECT id, nombre, direccion, telefono, correo, web, activo FROM sedes WHERE activo = 1";
-            $rows = $pdo->query($sql)->fetchAll();
+            $rows = $repo->select($sql);
         }
         // Mapear al formato esperado en front (nav: s.nombre; sucursales: s.latitud/s.longitud)
         $items = array_map(function($r) use ($city) {

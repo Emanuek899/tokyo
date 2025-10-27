@@ -6,8 +6,12 @@ class FacturacionRepo {
         $this->pdo = $pdo;
     }
 
-        /**
+    /**
      * Select SQL query
+     * @param string $sql The query sentence for the operation
+     * @param array $params The required parametes to acomplish the query
+     * @param string $mode Defines the fetch method to the return
+     * @return array  Data about factures
      */
     public function select(string $sql, array $params, string $mode = ''){
         $stmt = $this->pdo->prepare($sql);

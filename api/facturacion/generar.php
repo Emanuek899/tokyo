@@ -9,6 +9,7 @@ $FCT = is_file($BASE . '/config/facturama.php') ? ($BASE . '/config/facturama.ph
 require_once $CFG;
 require_once $UTL;
 if (is_file($FCT)) require_once $FCT;
+
 require_once __DIR__ . '/../../components/FacturacionRepo.php';
 
 function getTicketId(PDO $pdo, int $ticketId, int $folioIn, FacturacionRepo $repo): int {

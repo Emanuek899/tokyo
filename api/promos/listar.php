@@ -6,6 +6,7 @@ $CFG = is_file($BASE . '/config/db.php') ? ($BASE . '/config/db.php') : ($BASE .
 $UTL = is_file($BASE . '/utils/response.php') ? ($BASE . '/utils/response.php') : ($BASE . '/backend/utils/response.php');
 require_once $CFG;
 require_once $UTL;
+require_once $BASE . '/components/promosRepo.php';
 
 function table_exists(PDO $pdo, string $table): bool {
   $q = $pdo->prepare("SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?");
@@ -16,12 +17,14 @@ function table_exists(PDO $pdo, string $table): bool {
 try {
   header('Content-Type: application/json; charset=utf-8');
   $pdo = DB::get();
-  $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+  $repo = new promosRepo($pdo);
 
   $items = [];
   if (table_exists($pdo, 'promociones')) {
-    $st = $pdo->query('SELECT id, nombre, regla, vigencia, tipo FROM promociones ORDER BY id DESC');
-    while ($r = $st->fetch(PDO::FETCH_ASSOC)) {
+    $st = $repo->select(
+      'SELECT id, nombre, regla, vigencia, tipo FROM promociones ORDER BY id DESC'
+    );
+    while ($r = $st) {
       $items[] = [
         'id' => (int)$r['id'],
         'nombre' => (string)($r['nombre'] ?? ''),

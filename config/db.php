@@ -6,7 +6,7 @@ class DB {
      * Create a connection with the database
      * @param string $sede the name of the sede
      * @return PDO return the pdo object of the respective sede, with the connec
-     *             tion of this one
+     *             tion of this one.
      */
     public static function get(string $sede = 'main'): PDO {
         
@@ -35,6 +35,11 @@ class DB {
         return $pdo;
     }
     
+    /**
+     * Select the respective config data for the sede
+     * @param string $sede the sede 
+     * @return array The database config for the respective sede
+     */
     private static function getSedeConfig(string $sede): array {
         $dbSedes = [
             'main' => [
