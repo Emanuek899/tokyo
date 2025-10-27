@@ -50,11 +50,3 @@
   --on-secondary: #FFFFFF;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #0F0F10;
-    --color-surface: #191A1B;
-    --color-text: #F4F5F7;
-    --color-border: #2A2C2E;
-  }
-}
