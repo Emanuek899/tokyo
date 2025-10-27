@@ -48,7 +48,7 @@
       <div class="container">
         <div class="section-header"><h2>Frecuentemente juntos</h2></div>
         <div class="grid grid--auto grid--responsive">
-          <?php for($i=0;$i<4;$i++) include __DIR__.'/components/card-producto.php'; ?>
+          <?php include __DIR__.'/components/card-producto.php'; ?>
         </div>
       </div>
     </section>

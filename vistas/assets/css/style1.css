@@ -5,7 +5,7 @@ body {
     color: #4e4c4c;
     background: #1a1a1a;
     font-family: 'open sans', sans-serif;
-    min-width: 480px;
+    min-width: 0;
 }
 
 h1,
