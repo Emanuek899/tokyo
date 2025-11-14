@@ -1,0 +1,49 @@
+@BASEURL=http://localhost/tokyo/api/carrito/
+### Endpoint to actualize the cart
+POST {{BASEURL}}actualizar.php
+Content-Type: application/json
+
+{
+    "producto_id": 77,
+    "cantidad" : 6
+}
+
+### Endpoint to add product to the cart
+POST {{BASEURL}}agregar.php
+Content-Type: application/json
+
+{
+    "producto_id": 14,
+    "cantidad" : 1
+}
+
+### Endpoint to get the cart
+GET {{BASEURL}}listar.php
+
+### Endpoint to calculate
+POST {{BASEURL}}calcular.php
+Content-Type: application/json
+
+{
+    "items": [
+    {
+      "id": 77,
+      "nombre": "Aderezo de Chipotle",
+      "precio": 10,
+      "cantidad": 6,
+      "subtotal": 60
+    }
+    ]
+}
+
+### Endpoint to delete product from the cart
+POST {{BASEURL}}eliminar.php
+Content-Type: application/json
+
+{
+    "producto_id": 77
+}
+
+### Endpoint to clean the cart
+POST {{BASEURL}}vaciar.php
+Content-Type: application/json

@@ -8,7 +8,7 @@ require_once dirname(__DIR__, 2) . '/utils/validator.php';
 
 try {
     if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-        json_error('Método no permitido', 405);
+        json_error(['Método no permitido'], 405);
     }
     $input = json_decode(file_get_contents('php://input'), true) ?: [];
     $producto_id = (int)($input['producto_id'] ?? 0);
@@ -48,6 +48,6 @@ try {
     cart_set_qty($producto_id, $cantidad);
     json_response(['success'=>true,'ok' => true, 'carrito' => cart_get_all()]);
 } catch (Throwable $e) {
-    json_error('Error al actualizar carrito', 500, $e->getMessage());
+    json_error(['Error al actualizar carrito'], 500, $e->getMessage());
 }
 

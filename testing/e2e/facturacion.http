@@ -1,0 +1,11 @@
+@BASEURL=http://localhost/tokyo/api/facturacion/
+
+### generar.php
+POST {{BASEURL}}generar.php
+
+### obtener.php
+GET {{BASEURL}}obtener.php
+
+### registrar_cliente.php
+POST {{BASEURL}}confirmar.php
+

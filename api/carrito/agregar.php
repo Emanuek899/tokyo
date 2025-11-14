@@ -8,7 +8,7 @@ require_once dirname(__DIR__, 2) . '/utils/validator.php';
 
 try {
     if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
-        json_error('Método no permitido', 405);
+        json_error(['Método no permitido'], 405);
     }
     $pdo = DB::get();
     $c = corte_abierto($pdo);
@@ -41,6 +41,6 @@ try {
     cart_add($producto_id, $cantidad);
     json_response(['success'=>true,'ok' => true, 'carrito' => cart_get_all()]);
 } catch (Throwable $e) {
-    json_error('Error al agregar al carrito', 500, $e->getMessage());
+    json_error(['Error al agregar al carrito'], 500, $e->getMessage());
 }
 

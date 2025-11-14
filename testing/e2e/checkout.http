@@ -1,0 +1,22 @@
+@BASEURL=http://localhost/tokyo/api/checkout/
+
+### conekta_init.php
+POST {{BASEURL}}conekta_init.php
+
+### conekta_wehook.php
+POST {{BASEURL}}conekta_webhook.php
+
+### confirmar.php
+POST {{BASEURL}}confirmar.php
+
+### mark_paid.php
+POST {{BASEURL}}mark_paid.php?
+Content-Type: application/json
+
+{
+    "ref": "tokyo_ba49faa623c645b9"
+}
+
+### status.php
+GET {{BASEURL}}status.php?ref=tokyo_0bfb49116a40551d
+Content-Type: application/json

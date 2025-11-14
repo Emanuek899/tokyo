@@ -25,17 +25,18 @@ try {
         SET status="paid", updated_at=NOW() 
         WHERE reference = :ref AND status <> "paid"';
     $paramsUpdate = [':ref' => $ref];
-    $repo->update($sqlUpdate, $params);
+    $repo->update($sqlUpdate, $paramsUpdate);
 
     $selectSql = '
         SELECT id, reference, status, venta_id 
         FROM conekta_payments 
         WHERE reference = :ref';
     $selectParams = [':ref' => $ref];
-    $row = $repo->select($selectSql, $params);
-    $validator = Validator::validate(["conekta_payment" => $row], ["conekta_payment" => 'Existence']);
-    if (!empty($validator)) json_error($validator, 404);
-    json_response(['success' => true, 'reference' => $row['reference'], 'status' => $row['status'], 'venta_id' => $row['venta_id'] ? (int)$row['venta_id'] : null, 'payment_id' => (int)$row['id']]);
+    $row = $repo->select($selectSql, $selectParams);
+    // $validator = Validator::validate(["conekta_payment" => $row], ["conekta_payment" => 'Existence']);
+    // if (!empty($validator)) json_error($validator, 404);
+    // json_response(['success' => true, 'reference' => $row['reference'], 'status' => $row['status'], 'venta_id' => $row['venta_id'] ? (int)$row['venta_id'] : null, 'payment_id' => (int)$row['id']]);
+    json_response($row);
 } catch (Throwable $e) {
     json_error(['Error'], 500, $e->getMessage());
 }

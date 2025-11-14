@@ -119,7 +119,7 @@ try {
             else { $customer_phone = '+'.$digits; }
         }
     }
-    $customer_email = trim((string)($input['email'] ?? ''));
+    $customer_email = trim((string)($input['email'] ?? 'generic@gmail.com'));
     $payment_methods = $input['metodos'] ?? ['card']; // ['card','cash','bank_transfer']
     $method = is_array($payment_methods) && count($payment_methods) ? (string)$payment_methods[0] : 'card';
     // Optional order context

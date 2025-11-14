@@ -18,8 +18,8 @@ try {
     $pdo = DB::get();
     $cart = cart_get_all();
     $validCart = Validator::validate(['cart' => $cart], ['cart' => 'Empty']);
-    if (empty($ValidCart)) {
-        json_error($validatedCart, 422);
+    if (!empty($validCart)) {
+        json_error($validCart, 422);
         exit;
     }
     $input = json_decode(file_get_contents('php://input'), true) ?: [];

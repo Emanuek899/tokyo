@@ -1,0 +1,4 @@
+@BASEURL=http://localhost/tokyo/api/corte_caja/
+
+### conekta_init.php
+POST {{BASEURL}}verificar_corte_abierto.php
