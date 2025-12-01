@@ -12,7 +12,7 @@
   --color-secondary: #111111; /* dark UI accents */
   --color-accent: #cc0000; /* align accent with primary */
   --color-bg: #FFFFFF; /* neutral background */
-  --color-surface: #FFFFFF;
+  --color-surface: #;
   --color-text: #111111;
   --color-muted: #6C757D;
   --color-success: #28A745;
@@ -50,3 +50,11 @@
   --on-secondary: #FFFFFF;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0F0F10;
+    --color-surface: #191A1B;
+    --color-text: #F4F5F7;
+    --color-border: #2A2C2E;
+  }
+}

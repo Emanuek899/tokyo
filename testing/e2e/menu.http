@@ -1,0 +1,14 @@
+@BASEURL=http://localhost/tokyo/api/menu/
+
+### categorias.php
+GET {{BASEURL}}categorias.php
+
+### listar.php
+GET {{BASEURL}}listar.php
+
+### obtener.php
+GET {{BASEURL}}obtener.php?id=6&sede_id=1
+
+### top_vendidos.php
+Get {{BASEURL}}top_vendidos.php?sede_id=1
+

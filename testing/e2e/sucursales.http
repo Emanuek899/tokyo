@@ -1,0 +1,4 @@
+@BASEURL=http://localhost/tokyo/api/sucursales/
+
+### lista.php
+GET {{BASEURL}}listar.php

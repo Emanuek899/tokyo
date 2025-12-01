@@ -9,7 +9,7 @@ try {
     if (($_SERVER['REQUEST_METHOD'] ?? '') === 'GET') {
         require_rate_limit('clientes-get', 60, 600);
         $rfc = strtoupper(trim((string)($_GET['rfc'] ?? '')));
-        if ($rfc === '') { json_error('RFC requerido', 422); }
+        if ($rfc === '') { json_error(['RFC requerido'], 422); }
         $st = $pdo->prepare('SELECT id, rfc, razon_social, regimen AS regimen_fiscal, cp AS tax_zip, uso_cfdi, correo FROM clientes_facturacion WHERE rfc = ? LIMIT 1');
         $st->execute([$rfc]);
         $c = $st->fetch();
@@ -25,9 +25,9 @@ try {
         $cp = trim((string)($body['cp'] ?? ''));
         $uso = trim((string)($body['uso_cfdi'] ?? ''));
         $correo = trim((string)($body['correo'] ?? ''));
-        if (!preg_match('/^[A-Z&Ñ]{3,4}[0-9]{6}[A-Z0-9]{3}$/u', $rfc)) { json_error('RFC inválido', 422); }
-        if (!preg_match('/^[0-9]{5}$/', $cp)) { json_error('CP inválido', 422); }
-        if ($razon === '' || $regimen === '' || $uso === '') { json_error('Campos requeridos faltantes', 422); }
+        if (!preg_match('/^[A-Z&Ñ]{3,4}[0-9]{6}[A-Z0-9]{3}$/u', $rfc)) { json_error(['RFC inválido'], 422); }
+        if (!preg_match('/^[0-9]{5}$/', $cp)) { json_error(['CP inválido'], 422); }
+        if ($razon === '' || $regimen === '' || $uso === '') { json_error(['Campos requeridos faltantes'], 422); }
 
         // Upsert por RFC
         $st = $pdo->prepare('SELECT id FROM clientes_facturacion WHERE rfc = ? LIMIT 1');
@@ -43,9 +43,9 @@ try {
             json_response(['ok'=>true, 'cliente_id'=>(int)$pdo->lastInsertId()]);
         }
     } else {
-        json_error('Metodo no permitido', 405);
+        json_error(['Metodo no permitido'], 405);
     }
 } catch (Throwable $e) {
-    json_error('Error en clientes fiscales', 500, $e->getMessage());
+    json_error(['Error en clientes fiscales'], 500, $e->getMessage());
 }
 

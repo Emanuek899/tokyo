@@ -96,7 +96,9 @@ class MenuRepo
      */
     public function categorias(): array
     {
-        $stmt = $this->pdo->query("SELECT id, nombre FROM catalogo_categorias ORDER BY nombre ASC");
+        $stmt = $this->pdo->query("
+            SELECT id, nombre FROM catalogo_categorias ORDER BY nombre ASC"
+        );
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

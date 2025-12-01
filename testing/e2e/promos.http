@@ -1,0 +1,3 @@
+@BASEURL=http://localhost/tokyo/api/promos/
+### Endpoint to actualize the cart
+GET {{BASEURL}}listar.php
